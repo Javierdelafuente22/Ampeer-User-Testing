@@ -39,7 +39,7 @@ function CompleteScreen() {
       {/* Brand mark up top */}
       <div style={{
         display: 'flex', justifyContent: 'center',
-        marginTop: 8, marginBottom: 36,
+        marginTop: 48, marginBottom: 56,
       }}>
         <PeerwayLogo size={20}/>
       </div>

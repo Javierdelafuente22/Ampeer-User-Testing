@@ -78,12 +78,16 @@ function YesMaybeNoQuestion({ value, onChange }) {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
             }}
           >
-            {selected && (
-              <span style={{ color: 'var(--lime-400)', display: 'flex' }}>
-                <IconCheck size={14}/>
-              </span>
-            )}
             <span>{opt.label}</span>
+            {/* Reserve check-icon space on every button so when one is
+                selected, the labels stay vertically aligned across the row. */}
+            <span style={{
+              color: 'var(--lime-400)',
+              display: 'flex',
+              visibility: selected ? 'visible' : 'hidden',
+            }}>
+              <IconCheck size={14}/>
+            </span>
           </button>
         );
       })}

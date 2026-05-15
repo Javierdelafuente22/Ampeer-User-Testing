@@ -1,0 +1,22 @@
+# Claude Code local state
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+
+# Vercel
+.vercel/
+
+# Node (defensive — no deps used here, but in case something pulls them in)
+node_modules/

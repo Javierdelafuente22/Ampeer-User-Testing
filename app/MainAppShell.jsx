@@ -101,9 +101,10 @@ function MainAppShell({
       enabled={allTabsVisited}
       visitedCount={tabsVisited.length}
       onClick={onEndStudy}
+      isMobile={isMobile}
     />
   ) : endStudyMode === 'return' ? (
-    <ReturnToSurveyButton onClick={onEndStudy}/>
+    <ReturnToSurveyButton onClick={onEndStudy} isMobile={isMobile}/>
   ) : null;
 
   const renderTab = () => {
@@ -169,8 +170,9 @@ function MainAppShell({
 
 // Floating "Return to questionnaire" pill — shown when the participant is
 // revisiting the app from Stage 3.
-function ReturnToSurveyButton({ onClick }) {
+function ReturnToSurveyButton({ onClick, isMobile }) {
   const [hov, setHov] = React.useState(false);
+  const top = isMobile ? 'calc(env(safe-area-inset-top, 0px) + 6px)' : 60;
   return (
     <button
       onClick={onClick}
@@ -178,7 +180,7 @@ function ReturnToSurveyButton({ onClick }) {
       onMouseLeave={() => setHov(false)}
       style={{
         position: 'absolute',
-        top: 60, right: 16,
+        top, right: 16,
         zIndex: 70,
         appearance: 'none', cursor: 'pointer',
         border: '1px solid var(--ink-900)',

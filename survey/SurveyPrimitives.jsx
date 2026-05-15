@@ -29,8 +29,13 @@ function QuestionHeader({ index, total, prompt, subtitle }) {
 }
 
 // Floating "End study" pill — sits above the iOS chrome at top-right.
-function EndStudyButton({ enabled, visitedCount, totalCount = 5, onClick }) {
+// On desktop it must clear the IOSDevice's fake status bar (~50px),
+// so we use top: 60. On mobile (full-screen viewport, no fake frame),
+// the same value puts it on top of TabHeader items (bell, weather pill,
+// live counter). On mobile we sit just below the real OS safe area.
+function EndStudyButton({ enabled, visitedCount, totalCount = 5, onClick, isMobile }) {
   const [hov, setHov] = React.useState(false);
+  const top = isMobile ? 'calc(env(safe-area-inset-top, 0px) + 6px)' : 60;
   return (
     <button
       onClick={enabled ? onClick : undefined}
@@ -39,7 +44,7 @@ function EndStudyButton({ enabled, visitedCount, totalCount = 5, onClick }) {
       disabled={!enabled}
       style={{
         position: 'absolute',
-        top: 60,
+        top,
         right: 16,
         zIndex: 70,
         appearance: 'none',

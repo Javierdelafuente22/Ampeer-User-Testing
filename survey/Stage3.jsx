@@ -1,31 +1,37 @@
-// Stage 3 — Post-app (6 Yes/Maybe/No + 2 screenshot comparisons + open feedback).
-// Q6 branches based on the Stage 1 solar profile.
-// Includes a "Back to the app" button that returns to MainAppShell on the same question.
+// Stage 3 — Post-app (11 numbered + 1 open feedback = 12 panels total).
+// Q11 wording branches on the Stage 1 solar profile.
+// "Back to the app" lets the participant re-enter MainAppShell mid-survey
+// and resume on the same question they left.
 
 function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQuestionIndex }) {
-  const TOTAL = 9; // 8 numbered + 1 final open-text panel
+  const TOTAL = 12; // displayed total — 11 questions + 1 open-text/email panel
   const q = questionIndex;
   const onNext = () => (q < TOTAL - 1 ? setQuestionIndex(q + 1) : onSubmit());
   const goBack = () => (q > 0 ? setQuestionIndex(q - 1) : undefined);
 
+  // Q11 wording branches on Stage 1 solar profile.
   const isProsumerOrInterested =
     responses.solarProfile === 'have_solar' ||
     responses.solarProfile === 'interested_in_solar';
-  const q6Prompt = isProsumerOrInterested
+  const q11Prompt = isProsumerOrInterested
     ? 'Would you use an app like this if it were available to you?'
-    : 'Would you consider switching to solar panels if an app like this were available?';
+    : 'Would this app make you more willing to install solar panels?';
 
   const answers = [
-    responses.stage3_q1_animationHelped,
-    responses.stage3_q2_dataEasyToUnderstand,
-    responses.stage3_q3_communityConnection,
-    responses.stage3_q4_privacyComfortable,
-    responses.stage3_q5_assistantTrustworthy,
-    responses.stage3_q6_wouldUseOrSwitch,
-    responses.stage3_q7_homeOverviewComparison,
-    responses.stage3_q8_dashboardComparison,
+    responses.stage3_q1_dataEasyToUnderstand,
+    responses.stage3_q2_homeAnimationHelped,
+    responses.stage3_q3_homePricingClear,
+    responses.stage3_q4_homeOverviewComparison,
+    responses.stage3_q5_communitySense,
+    responses.stage3_q6_dashboardReportsUseful,
+    responses.stage3_q7_dashboardComparison,
+    responses.stage3_q8_assistantTrustworthy,
+    responses.stage3_q9_smartModeIntrusive,
+    responses.stage3_q10_profileSupport,
+    responses.stage3_q11_appWillingnessSolar,
   ];
-  const answered = q === 8 ? true : answers[q] !== undefined;
+  // Last panel (q=11) is the optional open text + email, no answer required.
+  const answered = q === 11 ? true : answers[q] !== undefined;
 
   return (
     <PwScreen step={q} totalSteps={TOTAL} onBack={q > 0 ? goBack : undefined}>
@@ -49,82 +55,111 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
 
       {q === 0 && (
         <>
-          <QuestionHeader index={1} total={8}
-            prompt="Did the live energy flow animation help you understand what was happening in your home?"/>
+          <QuestionHeader index={1} total={TOTAL}
+            prompt="Was the data and information across the app easy to understand?"/>
           <YesMaybeNoQuestion
-            value={responses.stage3_q1_animationHelped}
-            onChange={(v) => update({ stage3_q1_animationHelped: v })}/>
+            value={responses.stage3_q1_dataEasyToUnderstand}
+            onChange={(v) => update({ stage3_q1_dataEasyToUnderstand: v })}/>
         </>
       )}
       {q === 1 && (
         <>
-          <QuestionHeader index={2} total={8}
-            prompt="Was the data and information across the app easy to understand?"/>
+          <QuestionHeader index={2} total={TOTAL}
+            prompt="Did the energy flow animation in the home tab help you understand what was happening in your home?"/>
           <YesMaybeNoQuestion
-            value={responses.stage3_q2_dataEasyToUnderstand}
-            onChange={(v) => update({ stage3_q2_dataEasyToUnderstand: v })}/>
+            value={responses.stage3_q2_homeAnimationHelped}
+            onChange={(v) => update({ stage3_q2_homeAnimationHelped: v })}/>
         </>
       )}
       {q === 2 && (
         <>
-          <QuestionHeader index={3} total={8}
-            prompt="Did you feel a sense of connection to your local energy community?"/>
+          <QuestionHeader index={3} total={TOTAL}
+            prompt="Was the pricing in the home tab clear and easy to understand?"/>
           <YesMaybeNoQuestion
-            value={responses.stage3_q3_communityConnection}
-            onChange={(v) => update({ stage3_q3_communityConnection: v })}/>
+            value={responses.stage3_q3_homePricingClear}
+            onChange={(v) => update({ stage3_q3_homePricingClear: v })}/>
         </>
       )}
       {q === 3 && (
         <>
-          <QuestionHeader index={4} total={8}
-            prompt="Did you feel comfortable with how your identity and data are kept private?"/>
-          <YesMaybeNoQuestion
-            value={responses.stage3_q4_privacyComfortable}
-            onChange={(v) => update({ stage3_q4_privacyComfortable: v })}/>
+          <QuestionHeader index={4} total={TOTAL}
+            prompt="Which home energy overview feels easier to use at a glance?"/>
+          <ComparisonQuestion
+            ampeerImage="survey-screenshots/ampeer-home.png"
+            enphaseImage="survey-screenshots/enphase-home.png"
+            value={responses.stage3_q4_homeOverviewComparison}
+            onChange={(v) => update({ stage3_q4_homeOverviewComparison: v })}/>
         </>
       )}
       {q === 4 && (
         <>
-          <QuestionHeader index={5} total={8}
-            prompt="Did the AI assistant feel useful and trustworthy?"/>
+          <QuestionHeader index={5} total={TOTAL}
+            prompt="Did the community tab give you a sense of being part of a local energy network?"/>
           <YesMaybeNoQuestion
-            value={responses.stage3_q5_assistantTrustworthy}
-            onChange={(v) => update({ stage3_q5_assistantTrustworthy: v })}/>
+            value={responses.stage3_q5_communitySense}
+            onChange={(v) => update({ stage3_q5_communitySense: v })}/>
         </>
       )}
       {q === 5 && (
         <>
-          <QuestionHeader index={6} total={8} prompt={q6Prompt}/>
+          <QuestionHeader index={6} total={TOTAL}
+            prompt="Did the weekly report and notifications in the dashboard help you understand your energy activity?"/>
           <YesMaybeNoQuestion
-            value={responses.stage3_q6_wouldUseOrSwitch}
-            onChange={(v) => update({ stage3_q6_wouldUseOrSwitch: v })}/>
+            value={responses.stage3_q6_dashboardReportsUseful}
+            onChange={(v) => update({ stage3_q6_dashboardReportsUseful: v })}/>
         </>
       )}
       {q === 6 && (
         <>
-          <QuestionHeader index={7} total={8}
-            prompt="Which home energy overview felt more intuitive?"/>
+          <QuestionHeader index={7} total={TOTAL}
+            prompt="Which dashboard shows information that would be most useful to you?"/>
           <ComparisonQuestion
-            ampeerImage="survey-screenshots/ampeer-home.png"
-            enphaseImage="survey-screenshots/enphase-home.png"
-            value={responses.stage3_q7_homeOverviewComparison}
-            onChange={(v) => update({ stage3_q7_homeOverviewComparison: v })}/>
+            ampeerImage="survey-screenshots/ampeer-dashboard.png"
+            enphaseImage="survey-screenshots/enphase-dashboard.png"
+            value={responses.stage3_q7_dashboardComparison}
+            onChange={(v) => update({ stage3_q7_dashboardComparison: v })}/>
         </>
       )}
       {q === 7 && (
         <>
-          <QuestionHeader index={8} total={8}
-            prompt="Which dashboard made it easier to understand your energy at a glance?"/>
-          <ComparisonQuestion
-            ampeerImage="survey-screenshots/ampeer-dashboard.png"
-            enphaseImage="survey-screenshots/enphase-dashboard.png"
-            value={responses.stage3_q8_dashboardComparison}
-            onChange={(v) => update({ stage3_q8_dashboardComparison: v })}/>
+          <QuestionHeader index={8} total={TOTAL}
+            prompt="Did the AI assistant feel useful and trustworthy?"/>
+          <YesMaybeNoQuestion
+            value={responses.stage3_q8_assistantTrustworthy}
+            onChange={(v) => update({ stage3_q8_assistantTrustworthy: v })}
+            skipLabel="Skip — I didn't use the AI assistant"/>
         </>
       )}
       {q === 8 && (
         <>
-          <QuestionHeader index={9} total={9}
+          <QuestionHeader index={9} total={TOTAL}
+            prompt="Did the smart mode in the AI assistant feel intrusive?"/>
+          <YesMaybeNoQuestion
+            value={responses.stage3_q9_smartModeIntrusive}
+            onChange={(v) => update({ stage3_q9_smartModeIntrusive: v })}
+            skipLabel="Skip — I didn't use smart mode"/>
+        </>
+      )}
+      {q === 9 && (
+        <>
+          <QuestionHeader index={10} total={TOTAL}
+            prompt="Did the Profile tab give you the support and information you needed?"/>
+          <YesMaybeNoQuestion
+            value={responses.stage3_q10_profileSupport}
+            onChange={(v) => update({ stage3_q10_profileSupport: v })}/>
+        </>
+      )}
+      {q === 10 && (
+        <>
+          <QuestionHeader index={11} total={TOTAL} prompt={q11Prompt}/>
+          <YesMaybeNoQuestion
+            value={responses.stage3_q11_appWillingnessSolar}
+            onChange={(v) => update({ stage3_q11_appWillingnessSolar: v })}/>
+        </>
+      )}
+      {q === 11 && (
+        <>
+          <QuestionHeader index={12} total={TOTAL}
             prompt="Anything else you'd like to share?"
             subtitle="Optional — anything that surprised, confused, or delighted you."/>
           <OpenTextQuestion

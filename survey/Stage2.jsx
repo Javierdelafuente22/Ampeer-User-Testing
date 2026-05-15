@@ -1,6 +1,10 @@
-// Stage 2 — Post-onboarding (4 Yes/Maybe/No + 2 screenshot comparisons).
+// Stage 2 — Post-onboarding (5 questions).
+// Q1, Q2: simple YMN.
+// Q3: YMN + 4th "Skip — I didn't read the Terms & Conditions" button.
+// Q4, Q5: screenshot comparisons.
+
 function Stage2({ responses, update, onComplete, onBack }) {
-  const TOTAL = 6;
+  const TOTAL = 5;
   const [q, setQ] = React.useState(0);
   const onNext = () => (q < TOTAL - 1 ? setQ(q + 1) : onComplete());
   const goBack = () => (q === 0 ? onBack() : setQ(q - 1));
@@ -8,10 +12,9 @@ function Stage2({ responses, update, onComplete, onBack }) {
   const answers = [
     responses.stage2_q1_simpleOnboarding,
     responses.stage2_q2_understoodAmpeer,
-    responses.stage2_q3_understoodPricing,
-    responses.stage2_q4_informedAboutRights,
-    responses.stage2_q5_setupComparison,
-    responses.stage2_q6_termsComparison,
+    responses.stage2_q3_termsHelpedUnderstandRights,
+    responses.stage2_q4_setupComparison,
+    responses.stage2_q5_termsComparison,
   ];
   const answered = answers[q] !== undefined;
 
@@ -38,43 +41,34 @@ function Stage2({ responses, update, onComplete, onBack }) {
       {q === 2 && (
         <>
           <QuestionHeader index={3} total={TOTAL}
-            prompt="Did you understand how the trading price is set?"/>
+            prompt="Did the Terms & Conditions plain English summary help you understand your rights?"/>
           <YesMaybeNoQuestion
-            value={responses.stage2_q3_understoodPricing}
-            onChange={(v) => update({ stage2_q3_understoodPricing: v })}/>
+            value={responses.stage2_q3_termsHelpedUnderstandRights}
+            onChange={(v) => update({ stage2_q3_termsHelpedUnderstandRights: v })}
+            skipLabel="Skip — I didn't read the Terms & Conditions"/>
         </>
       )}
       {q === 3 && (
         <>
           <QuestionHeader index={4} total={TOTAL}
-            prompt="Did you feel informed about your rights and regulations in energy trading?"/>
-          <YesMaybeNoQuestion
-            value={responses.stage2_q4_informedAboutRights}
-            onChange={(v) => update({ stage2_q4_informedAboutRights: v })}/>
+            prompt="Which account setup process feels simpler and more trustworthy?"
+            subtitle="Enphase is one of the most popular home energy management apps in the UK."/>
+          <ComparisonQuestion
+            ampeerImage="survey-screenshots/ampeer-setup.png"
+            enphaseImage="survey-screenshots/enphase-setup.png"
+            value={responses.stage2_q4_setupComparison}
+            onChange={(v) => update({ stage2_q4_setupComparison: v })}/>
         </>
       )}
       {q === 4 && (
         <>
           <QuestionHeader index={5} total={TOTAL}
-            prompt="Which account setup process felt simpler?"
-            subtitle="Compare the two onboarding flows below."/>
-          <ComparisonQuestion
-            ampeerImage="survey-screenshots/ampeer-setup.png"
-            enphaseImage="survey-screenshots/enphase-setup.png"
-            value={responses.stage2_q5_setupComparison}
-            onChange={(v) => update({ stage2_q5_setupComparison: v })}/>
-        </>
-      )}
-      {q === 5 && (
-        <>
-          <QuestionHeader index={6} total={TOTAL}
-            prompt="Which presentation of terms felt clearer and more trustworthy?"
-            subtitle="Look at how each app presents its legal terms."/>
+            prompt="Which presentation of terms feels simpler and more trustworthy?"/>
           <ComparisonQuestion
             ampeerImage="survey-screenshots/ampeer-terms.png"
             enphaseImage="survey-screenshots/enphase-terms.png"
-            value={responses.stage2_q6_termsComparison}
-            onChange={(v) => update({ stage2_q6_termsComparison: v })}/>
+            value={responses.stage2_q5_termsComparison}
+            onChange={(v) => update({ stage2_q5_termsComparison: v })}/>
         </>
       )}
 

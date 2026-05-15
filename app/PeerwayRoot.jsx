@@ -152,7 +152,7 @@ function PeerwayRoot() {
     return renderInFrame(
       <TransitionScreen
         title="You are about to begin the onboarding experience."
-        subtitle="Take your time. Go through every screen as if you were a real new user."
+        subtitle="About 3 minutes. Go through every screen as if you were a real user."
         cta="Start onboarding"
         onContinue={() => setPhase('onboarding')}
       />
@@ -178,7 +178,7 @@ function PeerwayRoot() {
       <TransitionScreen
         eyebrow="Onboarding complete"
         title="Tell us how that felt."
-        subtitle="6 quick questions about the onboarding experience. There are no wrong answers — your honest reaction is what's useful."
+        subtitle="5 quick questions about the onboarding experience — about 3 minutes. There are no wrong answers."
         cta="Start questionnaire"
         onContinue={() => setPhase('stage2')}
       />
@@ -199,8 +199,8 @@ function PeerwayRoot() {
   if (phase === 'transition_to_app') {
     return renderInFrame(
       <TransitionScreen
-        title="Thank you."
-        subtitle="You will now explore the full app, which will take you about 5 minutes."
+        title="Thank you — explore the main app next."
+        subtitle="It will take you about 6 minutes. Once explored, click the button top right to end the demo."
         cta="Open the app"
         onContinue={() => setPhase('app_exploration')}
       />
@@ -228,7 +228,7 @@ function PeerwayRoot() {
       <TransitionScreen
         eyebrow="Demo complete"
         title="One last set of questions."
-        subtitle="8 quick questions about your time in the app, plus an optional comment box at the end. About 3 minutes."
+        subtitle="12 quick questions about your time in the app — about 6 minutes."
         cta="Start questionnaire"
         onContinue={() => setPhase('stage3')}
       />

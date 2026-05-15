@@ -5,8 +5,8 @@ function ConsentScreen({ onContinue }) {
     <PwScreen>
       <PwPageTitle
         eyebrow="User study"
-        title="Welcome — and thank you."
-        subtitle="You're about to test Ampeer, a prototype app for peer-to-peer solar energy trading. Your honest reactions will shape the design."
+        title={["Welcome — and", <br key="br" />, "thank you."]}
+        subtitle="You're about to test Ampeer, a prototype app for solar energy sharing. Your honest reactions will shape the design of the app."
         size={32}
       />
 
@@ -18,15 +18,15 @@ function ConsentScreen({ onContinue }) {
         padding: '18px 20px',
         display: 'flex', flexDirection: 'column', gap: 14,
       }}>
-        <InfoRow icon="⏱"  title="About 15 minutes" detail="Two short questionnaires, an onboarding flow, and free exploration of the app."/>
-        <InfoRow icon="🔒" title="Anonymous"        detail="We don't collect your name, email, or any identifying information."/>
-        <InfoRow icon="↩︎" title="You can withdraw any time" detail="Close the tab and your responses for this session are discarded."/>
-        <InfoRow icon="📤" title="What we collect"  detail="Only your answers to the survey questions. No tracking, no analytics."/>
+        <InfoRow icon="⏱"  title="About 20 minutes" detail="A fun demo and two short questionnaires."/>
+        <InfoRow icon="🔒" title="Anonymous"        detail="you don't need to provide email or name."/>
+        <InfoRow icon="↩︎" title="You can withdraw any time" detail="Close the tab before the end to stop."/>
+        <InfoRow icon="📤" title="What we collect"  detail="Only your answers to the survey questions."/>
       </div>
 
       <div style={{ marginTop: 18 }}>
         <PwReassurance title="Research purposes only">
-          Responses help us improve the design and are not used for any other purpose.
+          Responses help us improve the app's design and are not used for any other purpose.
         </PwReassurance>
       </div>
 
@@ -55,7 +55,7 @@ function ConsentScreen({ onContinue }) {
           {agreed && <span style={{ color: 'var(--lime-400)', display: 'flex' }}><IconCheck size={14}/></span>}
         </div>
         <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--ink-700)' }}>
-          I understand the purpose of this study and agree to participate. I know I can stop at any time.
+          I understand the purpose of this study and agree to participate.
         </span>
       </button>
 

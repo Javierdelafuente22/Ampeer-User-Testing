@@ -9,18 +9,18 @@ Google Sheet on submit.
 
 ```
 1.  Consent
-2.  Stage 1 — Profile (single page: optional name + 2 profile questions)
+2.  Stage 1 — Profile (two pages: optional name + solar question, then knowledge)
 3.  Green takeover — "You are about to begin the onboarding experience."
 4.  Onboarding (the existing 6-screen Ampeer flow, personalised with the name)
 5.  Green takeover — "Onboarding complete. Tell us how that felt."
-6.  Stage 2 — Post-onboarding (4 Yes/Maybe/No + 2 screenshot comparisons)
+6.  Stage 2 — Post-onboarding (3 Yes/Maybe/No + 2 screenshot comparisons = 5 q)
 7.  Green takeover — "You will now explore the full app…"
 8.  App exploration  ← full Ampeer MainAppShell with a floating
                        "Visit all 5 tabs — N/5" pill at top-right that
                        becomes "End study" once all 5 tabs have been visited
 9.  Green takeover — "Demo complete. One last set of questions."
-10. Stage 3 — Post-app (6 Yes/Maybe/No + 2 comparisons + open feedback
-                        + optional follow-up email).
+10. Stage 3 — Post-app (9 Yes/Maybe/No (2 with optional "Skip") + 2 comparisons
+                        + open feedback + optional follow-up email = 12 panels).
               A persistent "Back to the app" link lets the participant
               re-enter MainAppShell and resume on the same question.
 11. Submit → Supabase
@@ -66,6 +66,11 @@ library is required — the browser POSTs straight to Supabase's REST API.
 
 ### 2. Create the table
 
+> **First time?** Just run the block below.
+>
+> **Migrating from a previous schema?** Run `drop table if exists responses;`
+> first to start clean. The column layout below replaces the old one.
+
 In the Supabase dashboard, open **SQL Editor → New query**, paste this, then
 **Run**:
 
@@ -85,30 +90,32 @@ create table responses (
   solar_profile     text,
   energy_knowledge  text,
 
-  -- Stage 2 — post-onboarding
-  stage2_simple_onboarding      text,
-  stage2_understood_ampeer      text,
-  stage2_understood_pricing     text,
-  stage2_informed_about_rights  text,
-  stage2_setup_comparison       text,
-  stage2_terms_comparison       text,
+  -- Stage 2 — post-onboarding (5 questions)
+  stage2_simple_onboarding    text,  -- yes / maybe / no
+  stage2_understood_ampeer    text,  -- yes / maybe / no
+  stage2_terms_helped_rights  text,  -- yes / maybe / no / skip
+  stage2_setup_comparison     text,  -- ampeer / about_the_same / enphase
+  stage2_terms_comparison     text,  -- ampeer / about_the_same / enphase
 
   -- App exploration
   app_tabs_visited  text[],
 
-  -- Stage 3 — post-app
-  stage3_animation_helped         text,
-  stage3_data_easy_to_understand  text,
-  stage3_community_connection     text,
-  stage3_privacy_comfortable      text,
-  stage3_assistant_trustworthy    text,
-  stage3_would_use_or_switch      text,
-  stage3_home_overview_comparison text,
-  stage3_dashboard_comparison     text,
-  stage3_open_feedback            text,
+  -- Stage 3 — post-app (11 questions + optional comment + optional email)
+  stage3_data_easy_to_understand   text,  -- yes / maybe / no
+  stage3_home_animation_helped     text,  -- yes / maybe / no
+  stage3_home_pricing_clear        text,  -- yes / maybe / no
+  stage3_home_overview_comparison  text,  -- ampeer / about_the_same / enphase
+  stage3_community_sense           text,  -- yes / maybe / no
+  stage3_dashboard_reports_useful  text,  -- yes / maybe / no
+  stage3_dashboard_comparison      text,  -- ampeer / about_the_same / enphase
+  stage3_assistant_trustworthy     text,  -- yes / maybe / no / skip
+  stage3_smart_mode_intrusive      text,  -- yes / maybe / no / skip
+  stage3_profile_support           text,  -- yes / maybe / no
+  stage3_app_willingness_solar     text,  -- yes / maybe / no
+  stage3_open_feedback             text,
 
   -- Optional follow-up contact
-  follow_up_email                 text
+  follow_up_email                  text
 );
 
 alter table responses enable row level security;
@@ -232,18 +239,20 @@ Each row in the `responses` table looks like:
 | `energy_knowledge`                | `a_lot` / `basics` / `very_little`            |
 | `stage2_simple_onboarding`        | `yes` / `maybe` / `no`                        |
 | `stage2_understood_ampeer`        | `yes` / `maybe` / `no`                        |
-| `stage2_understood_pricing`       | `yes` / `maybe` / `no`                        |
-| `stage2_informed_about_rights`    | `yes` / `maybe` / `no`                        |
+| `stage2_terms_helped_rights`      | `yes` / `maybe` / `no` / `skip`               |
 | `stage2_setup_comparison`         | `ampeer` / `about_the_same` / `enphase`       |
 | `stage2_terms_comparison`         | `ampeer` / `about_the_same` / `enphase`       |
 | `app_tabs_visited`                | `{home,community,dashboard,assistant,profile}` (Postgres text[]) |
-| `stage3_animation_helped`         | `yes` / `maybe` / `no`                        |
 | `stage3_data_easy_to_understand`  | `yes` / `maybe` / `no`                        |
-| `stage3_community_connection`     | `yes` / `maybe` / `no`                        |
-| `stage3_privacy_comfortable`      | `yes` / `maybe` / `no`                        |
-| `stage3_assistant_trustworthy`    | `yes` / `maybe` / `no`                        |
-| `stage3_would_use_or_switch`      | `yes` / `maybe` / `no`                        |
+| `stage3_home_animation_helped`    | `yes` / `maybe` / `no`                        |
+| `stage3_home_pricing_clear`       | `yes` / `maybe` / `no`                        |
 | `stage3_home_overview_comparison` | `ampeer` / `about_the_same` / `enphase`       |
+| `stage3_community_sense`          | `yes` / `maybe` / `no`                        |
+| `stage3_dashboard_reports_useful` | `yes` / `maybe` / `no`                        |
 | `stage3_dashboard_comparison`     | `ampeer` / `about_the_same` / `enphase`       |
+| `stage3_assistant_trustworthy`    | `yes` / `maybe` / `no` / `skip`               |
+| `stage3_smart_mode_intrusive`     | `yes` / `maybe` / `no` / `skip`               |
+| `stage3_profile_support`          | `yes` / `maybe` / `no`                        |
+| `stage3_app_willingness_solar`    | `yes` / `maybe` / `no`                        |
 | `stage3_open_feedback`            | free text (nullable)                          |
 | `follow_up_email`                 | `alex@example.com` (nullable)                 |

@@ -3,15 +3,15 @@
 //   Page 2: renewable-energy knowledge level
 
 const STAGE1_SOLAR_OPTIONS = [
-  { value: 'have_solar',          label: 'I have solar panels at home' },
-  { value: 'interested_in_solar', label: "I'm interested in buying solar panels" },
-  { value: 'not_interested',      label: "I'm not interested in solar panels" },
+  { value: 'yes_solar',          label: 'Yes' },
+  { value: 'no_solar_yes_interest', label: "No, but I would be interested" },
+  { value: 'no_interest',      label: "No, and I'm not interested" },
 ];
 
 const STAGE1_KNOWLEDGE_OPTIONS = [
-  { value: 'a_lot',       label: 'I know a lot about it' },
-  { value: 'basics',      label: 'I know the basics' },
-  { value: 'very_little', label: 'I know very little' },
+  { value: 'expert',       label: 'Active — I have a smart home and manage my own energy' },
+  { value: 'mid',      label: 'Curious - I have looked into it, but have not set anything up yet' },
+  { value: 'non-expert', label: 'New to it — Energy is not something I have thought much about' },
 ];
 
 function Stage1({ responses, update, onComplete, onBack }) {
@@ -30,33 +30,50 @@ function Stage1({ responses, update, onComplete, onBack }) {
       {q === 0 && (
         <>
           <PwPageTitle
-            eyebrow="A few quick questions"
+            eyebrow="Before we start..."
             title="Tell us about you."
-            subtitle="Two quick steps before the demo. Should take under a minute."
+            subtitle="There are no wrong answers — this helps us understand your background."
             size={30}
           />
 
           {/* First name (optional) */}
           <Field
-            label="Your first name"
-            sublabel="Optional — just so we can refer to you in the study."
+            label="Your first name — optional"
           >
             <input
               className="pw-input"
               value={responses.firstName || ''}
               onChange={(e) => update({ firstName: e.target.value })}
-              placeholder="e.g. Javi"
+              placeholder="e.g. Sarah"
               style={{ height: 52, fontSize: 16 }}
               autoFocus
             />
           </Field>
 
           {/* Solar profile */}
-          <Field label="Which best describes you?">
+          <Field label="Do you have solar panels at home?">
             <ChoiceQuestion
               options={STAGE1_SOLAR_OPTIONS}
               value={responses.solarProfile}
               onChange={(v) => update({ solarProfile: v })}
+            />
+          </Field>
+        </>
+      )}
+
+      {q === 1 && (
+        <>
+          <PwPageTitle
+            eyebrow="Before we start..."
+            title="Tell us about you."
+            size={30}
+          />
+
+          <Field label="How would you describe your experience with managing your home's energy?">
+            <ChoiceQuestion
+              options={STAGE1_KNOWLEDGE_OPTIONS}
+              value={responses.energyKnowledge}
+              onChange={(v) => update({ energyKnowledge: v })}
             />
           </Field>
 
@@ -75,28 +92,9 @@ function Stage1({ responses, update, onComplete, onBack }) {
             <div>
               <span style={{ fontWeight: 600, color: 'var(--ink-900)' }}>Why we ask.</span>{' '}
               Your name (if you give one) is only used to personalise the demo. Profile questions
-              help us understand who the study reached. Nothing is shared outside the research team.
+              help us understand who the study reached.
             </div>
           </div>
-        </>
-      )}
-
-      {q === 1 && (
-        <>
-          <PwPageTitle
-            eyebrow="Almost there"
-            title="One last thing."
-            subtitle="There are no wrong answers — this helps us understand your background."
-            size={30}
-          />
-
-          <Field label="How would you describe your knowledge of renewable energy?">
-            <ChoiceQuestion
-              options={STAGE1_KNOWLEDGE_OPTIONS}
-              value={responses.energyKnowledge}
-              onChange={(v) => update({ energyKnowledge: v })}
-            />
-          </Field>
         </>
       )}
 
@@ -112,10 +110,11 @@ function Field({ label, sublabel, children }) {
   return (
     <div style={{ marginBottom: 22 }}>
       <div style={{
-        fontSize: 14,
+        fontSize: 17,
         fontWeight: 600,
         color: 'var(--ink-900)',
-        letterSpacing: '-0.005em',
+        letterSpacing: '-0.01em',
+        lineHeight: 1.3,
         marginBottom: sublabel ? 4 : 10,
       }}>
         {label}

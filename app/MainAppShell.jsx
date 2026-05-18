@@ -157,18 +157,20 @@ function MainAppShell({
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '20px', boxSizing: 'border-box',
     }}>
-      <IOSDevice width={390} height={844}>
-        <div style={{ height: '100%', position: 'relative' }}>
-          {assistantLayer({})}
-          {tab !== 'assistant' && (
-            <div key={tab} style={{ height: '100%', position: 'relative' }} className="pw-fade-in">
-              {renderTab()}
-              <TabBar active={tab} onChange={handleSetTab}/>
-            </div>
-          )}
-          {surveyOverlay}
-        </div>
-      </IOSDevice>
+      <div style={{ transform: `scale(${DESKTOP_FRAME_SCALE})`, transformOrigin: 'center' }}>
+        <IOSDevice width={390} height={844}>
+          <div style={{ height: '100%', position: 'relative' }}>
+            {assistantLayer({})}
+            {tab !== 'assistant' && (
+              <div key={tab} style={{ height: '100%', position: 'relative' }} className="pw-fade-in">
+                {renderTab()}
+                <TabBar active={tab} onChange={handleSetTab}/>
+              </div>
+            )}
+            {surveyOverlay}
+          </div>
+        </IOSDevice>
+      </div>
     </div>
   );
 }

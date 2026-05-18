@@ -102,9 +102,11 @@ function PeerwayRoot() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '20px', boxSizing: 'border-box',
       }}>
-        <IOSDevice width={390} height={844}>
-          {content}
-        </IOSDevice>
+        <div style={{ transform: `scale(${DESKTOP_FRAME_SCALE})`, transformOrigin: 'center' }}>
+          <IOSDevice width={390} height={844}>
+            {content}
+          </IOSDevice>
+        </div>
       </div>
     );
   };

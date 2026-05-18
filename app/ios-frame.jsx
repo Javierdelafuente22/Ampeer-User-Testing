@@ -3,6 +3,11 @@
 // Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
 // Exports: IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
 
+// Single knob for visually shrinking the iOS frame on desktop. Mobile renders
+// full-viewport with no frame, so this only affects the laptop/browser view.
+// Tune 0.80–0.95 to taste. transform-origin: center keeps it visually centred.
+const DESKTOP_FRAME_SCALE = 0.8;
+
 // ─────────────────────────────────────────────────────────────
 // Status bar
 // ─────────────────────────────────────────────────────────────
@@ -345,4 +350,5 @@ function IOSKeyboard({ dark = false }) {
 
 Object.assign(window, {
   IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard,
+  DESKTOP_FRAME_SCALE,
 });

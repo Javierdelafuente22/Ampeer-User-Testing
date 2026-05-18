@@ -183,6 +183,21 @@ function HouseTab({ onNavigate, highlight, onClearHighlight, weatherState }) {
           transition: 'background 0.6s ease',
         }}>
           <HouseScene tick={tick} kind={activeKind} onTap={setPopup}/>
+          <div style={{
+            position: 'absolute', top: 10, right: 10,
+            padding: '4px 9px', borderRadius: 999,
+            background: 'rgba(255,255,255,0.78)',
+            border: '1px solid rgba(0,0,0,0.06)',
+            fontSize: 10.5, fontWeight: 500,
+            color: 'var(--ink-700)',
+            fontFamily: 'var(--font-sans)',
+            letterSpacing: '-0.005em',
+            pointerEvents: 'none',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+          }}>
+            Click any icon for details
+          </div>
           {popup && (
             <NodePopup
               kind={popup}
@@ -355,7 +370,7 @@ function OverridePanel({ override, onChange, liveKind, isLive, isLoading, hasErr
           fontSize: 14, lineHeight: 1.55, color: 'var(--ink-700)',
           margin: '0 0 24px',
         }}>
-          Only for demo purposes, move the slider to switch between sunny, cloudy and rainy. Tap "Reset to live" to use real-time weather data from Met UK.
+          Only for demo purposes, move the slider to switch between sunny, cloudy, rainy and night. Tap "Reset" to restore real-time weather data from Met UK.
         </p>
 
         <div style={{
@@ -379,6 +394,21 @@ function OverridePanel({ override, onChange, liveKind, isLive, isLoading, hasErr
                 : `Live · ${liveKind} in London`}
             </div>
           </div>
+          {override && (
+            <button onClick={() => onChange(null)} style={{
+              appearance: 'none', cursor: 'pointer',
+              padding: '4px 10px', borderRadius: 999,
+              background: 'var(--cream-100)',
+              border: '1px solid var(--cream-200)',
+              color: 'var(--ink-700)',
+              fontSize: 11, fontWeight: 500,
+              fontFamily: 'var(--font-sans)',
+              letterSpacing: '-0.005em',
+              flexShrink: 0,
+            }}>
+              Reset
+            </button>
+          )}
         </div>
 
         <div className="t-label" style={{ color: 'var(--ink-500)', fontSize: 11, marginBottom: 14 }}>
@@ -419,20 +449,19 @@ function OverridePanel({ override, onChange, liveKind, isLive, isLoading, hasErr
         </div>
 
         <button
-          onClick={() => onChange(null)}
-          disabled={!override}
+          onClick={onBack}
           style={{
-            appearance: 'none', cursor: override ? 'pointer' : 'default',
+            appearance: 'none', cursor: 'pointer',
             width: '100%', padding: '12px 14px',
-            background: override ? 'var(--ink-900)' : 'var(--cream-100)',
-            color: override ? '#fff' : 'var(--ink-400)',
-            border: '1px solid ' + (override ? 'var(--ink-900)' : 'var(--cream-200)'),
+            background: 'var(--ink-900)',
+            color: '#fff',
+            border: '1px solid var(--ink-900)',
             borderRadius: 'var(--r-md)',
             fontSize: 14, fontWeight: 500,
             fontFamily: 'var(--font-sans)',
             letterSpacing: '-0.005em',
           }}>
-          Reset to real-time data
+          Back to home
         </button>
       </div>
     </div>
@@ -709,7 +738,8 @@ function HouseScene({ tick, kind, onTap }) {
 
       {/* CLOUDS — small accent on cloudy, heavy on rainy (rainy clouds are tappable as 'sun') */}
       {kind === 'cloudy' && (
-        <g style={{ pointerEvents: 'none' }}>
+        <g style={tappableStyle} onClick={tap('sun')}>
+          <rect x={SUN_X - 145} y={SUN_Y - 45} width="290" height="90" fill="transparent"/>
           <Cloud cx={SUN_X + 26}  cy={SUN_Y + 8}   scale={1.05}/>
           <Cloud cx={SUN_X - 78}  cy={SUN_Y + 22}  scale={1.2}/>
           <Cloud cx={SUN_X - 130} cy={SUN_Y - 20}  scale={1.1}/>

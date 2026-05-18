@@ -2,7 +2,7 @@
 // On mobile, renders full-screen with no frame.
 // On desktop, keeps the centered IOSDevice card.
 
-function OnboardingFlow({ onComplete, firstName = 'Sarah', fullName = 'Sarah Chen', initials = 'SC' }) {
+function OnboardingFlow({ onComplete, firstName = 'Sarah', fullName = 'Sarah Chen', initials = 'SC', userProvidedName = false }) {
   const [step, setStep] = React.useState(0);
   const [state, setState] = React.useState({});
 
@@ -21,8 +21,8 @@ function OnboardingFlow({ onComplete, firstName = 'Sarah', fullName = 'Sarah Che
   const goBack = () => setStep(s => Math.max(0, s - 1));
 
   const screens = [
-    <Screen1_Postcode key="s1" state={state} setState={setState} onNext={goNext} firstName={firstName}/>,
-    <Screen2_Connected key="s2" provider="your energy provider" onNext={goNext}/>,
+    <Screen1_Postcode key="s1" state={state} setState={setState} onNext={goNext} firstName={firstName} userProvidedName={userProvidedName}/>,
+    <Screen2_Connected key="s2" provider="your energy provider" onNext={goNext} onBack={goBack}/>,
     <Screen3_Savings   key="s3" state={state} onNext={goNext} onBack={goBack}/>,
     <Screen4_Profile   key="s4" state={state} setState={setState} onNext={goNext} onBack={goBack} fullName={fullName} initials={initials}/>,
     <Screen5_Legal     key="s5" onNext={goNext} onBack={goBack}/>,

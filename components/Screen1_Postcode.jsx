@@ -1,5 +1,5 @@
 // Screen 1 — Welcome + pre-filled postcode confirmation
-function Screen1_Postcode({ state, setState, onNext, firstName = 'Sarah' }) {
+function Screen1_Postcode({ state, setState, onNext, firstName = 'Sarah', userProvidedName = false }) {
   const [postcode] = React.useState(state.postcode || 'SW6 3JD');
   const [communityOpen, setCommunityOpen] = React.useState(!!state.communityId);
   const [communityId, setCommunityId] = React.useState(state.communityId || '');
@@ -18,7 +18,7 @@ function Screen1_Postcode({ state, setState, onNext, firstName = 'Sarah' }) {
       <div style={{ marginBottom: 28 }}/>
       <PwPageTitle
         eyebrow=""
-        title={`Welcome to Ampeer, ${firstName}.`}
+        title={userProvidedName ? `Welcome to Ampeer, ${firstName}.` : 'Welcome to Ampeer.'}
         subtitle="You have been securely redirected from your Octopus online account. You are a few steps away from sharing energy with your neighbours."
         size={34}
       />

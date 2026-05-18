@@ -11,11 +11,11 @@ function SmartModeButton({ onClick }) {
       onMouseLeave={() => setHov(false)}
       style={{
         appearance: 'none', cursor: 'pointer',
-        background: hov ? 'var(--ink-900)' : 'var(--surface)',
+        background: hov ? '#1f2a25' : 'var(--ink-900)',
         border: '1.5px solid var(--ink-900)',
         padding: '7px 13px', borderRadius: 999,
         display: 'flex', alignItems: 'center', gap: 5,
-        fontSize: 12, color: hov ? '#fff' : 'var(--ink-900)', fontWeight: 600,
+        fontSize: 12, color: '#fff', fontWeight: 600,
         letterSpacing: '-0.01em', fontFamily: 'var(--font-sans)',
         transition: 'background .15s, color .15s, transform .15s',
         transform: hov ? 'translateY(-2px)' : 'none',
@@ -40,7 +40,7 @@ function AssistantTab({ firstName = 'Sarah' }) {
       },
       {
         role: 'ai', type: 'smart-promo',
-        text: "Or activate smart mode to connect to your calendar or mail and handle changes automatically.",
+        text: "Or activate smart mode to connect to your calendar or location and handle changes automatically.",
         ts: t,
       },
     ];
@@ -48,7 +48,7 @@ function AssistantTab({ firstName = 'Sarah' }) {
   const [input, setInput] = React.useState('');
   const [view, setView] = React.useState('chat'); // 'chat' | 'intelligence'
   const [calEnabled, setCalEnabled] = React.useState(false);
-  const [emailEnabled, setEmailEnabled] = React.useState(false);
+  const [locationEnabled, setLocationEnabled] = React.useState(false);
   const [listening, setListening] = React.useState(false);
   const recognitionRef = React.useRef(null);
   const scrollRef = React.useRef();
@@ -135,6 +135,15 @@ function AssistantTab({ firstName = 'Sarah' }) {
 
   const aiRespond = (text) => {
     const t = text.toLowerCase();
+    const greetingOnly = t.trim().replace(/[.!?]+$/, '');
+
+    // 0) GREETINGS — "hi", "hello", "hey there", etc.
+    if (/^(hi|hello|hey|hiya|howdy|hola|sup|yo|greetings|gm|good\s+(morning|afternoon|evening|day)|hi\s+there|hello\s+there|hey\s+there|what'?s\s+up)$/.test(greetingOnly)) {
+      return {
+        role: 'ai', type: 'message', ts: 'now',
+        text: `Hi ${firstName} — what would you like me to plan around today? I can help with holidays, your work schedule, or EV charging.`,
+      };
+    }
 
     // 1) HOLIDAY / TRAVEL / AWAY
     if (/\b(holiday|holidays|vacation|away|trip|travel|travelling|traveling|out of town|paris|spain|abroad|weekend away|going away|not home|not around|leaving town|leaving home|be away|be out|gone for|gone all|few days off|days off|week off|time off|flying|flight|airport|staying at|visiting|won't be home|won't be in|not in today|not in tomorrow|not back|back on|return on|gone until|empty house|house.?sit|nobody home|no one home|mum'?s|mom'?s|parents|friend'?s|bnb|airbnb|hotel|hostel|camping|festival|wedding|break|getaway|ski|beach|city break)\b/.test(t)) {
@@ -253,13 +262,17 @@ function AssistantTab({ firstName = 'Sarah' }) {
     });
   };
 
-  const handleEnable = ({ cal, email }) => {
-    const what = cal && email ? 'calendar and email' : cal ? 'calendar' : 'email';
+  const handleEnable = ({ cal, location }) => {
+    const text = cal && location
+      ? "Smart mode on. I've connected your calendar and location — I'll plan your trading around your schedule and fine-tune solar forecasts with local weather. No input needed from you."
+      : cal
+        ? "Smart mode on. I've connected your calendar — I'll plan your trading around your schedule automatically, no input needed from you."
+        : "Smart mode on. I've connected your location — I'll fine-tune solar production forecasts with local weather, no input needed from you.";
     setView('chat');
     setTimeout(() => {
       setMessages(m => [...m, {
         role: 'ai', type: 'done',
-        text: `Smart mode on. I've connected your ${what} and will plan your trading automatically — no input needed from you.`,
+        text,
         ts: nowBST(),
       }]);
     }, 300);
@@ -268,7 +281,7 @@ function AssistantTab({ firstName = 'Sarah' }) {
   if (view === 'intelligence') {
     return <IntelligenceScreen onBack={() => setView('chat')} onEnable={handleEnable}
       cal={calEnabled} onCalChange={setCalEnabled}
-      email={emailEnabled} onEmailChange={setEmailEnabled} />;
+      location={locationEnabled} onLocationChange={setLocationEnabled} />;
   }
 
   return (
@@ -550,8 +563,8 @@ function ChatBubble({ msg, idx, onConfirm, onSmartMode }) {
 }
 
 // Dedicated explainer screen — NOT a modal.
-function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, email, onEmailChange }) {
-  const anyOn = cal || email;
+function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, location, onLocationChange }) {
+  const anyOn = cal || location;
 
   return (
     <div className="pw-screen">
@@ -561,7 +574,7 @@ function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, email, onEmail
         background: 'var(--cream-50)',
         position: 'sticky', top: 0, zIndex: 2
       }}>
-        <button onClick={onBack} style={{
+        <button onClick={() => anyOn ? onEnable({ cal, location }) : onBack()} style={{
           appearance: 'none', border: 0, background: 'transparent',
           padding: 0, color: 'var(--ink-600)',
           display: 'flex', alignItems: 'center', gap: 4,
@@ -601,10 +614,10 @@ function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, email, onEmail
 
           <div style={{ borderTop: '1px solid var(--cream-200)' }} />
           <IntelToggle
-            title="Email"
-            detail="I'll only scan for travel confirmations to manage your home while you're away."
-            on={email} onChange={onEmailChange} />
-          
+            title="Location"
+            detail="I'll use your current location for hyper-local weather tracking, so I can predict your solar production more accurately."
+            on={location} onChange={onLocationChange} />
+
         </div>
 
         {/* What we won't do */}
@@ -627,9 +640,9 @@ function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, email, onEmail
           </div>
           <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
-            'Read personal messages',
-            'Store anything beyond travel events',
-            'Share your schedule with other users',
+            'Read your calendar notes or descriptions',
+            'Use your location for anything beyond weather',
+            'Share your schedule or location with other users',
             'Sell or share your data with advertisers'].
             map((t) =>
             <li key={t} style={{
@@ -650,7 +663,7 @@ function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, email, onEmail
           </ul>
         </div>
 
-        <button disabled={!anyOn} onClick={() => anyOn && onEnable({ cal, email })}
+        <button disabled={!anyOn} onClick={() => anyOn && onEnable({ cal, location })}
           className="pw-btn pw-btn-primary" style={{
           width: '100%', height: 52,
           opacity: anyOn ? 1 : 0.4,

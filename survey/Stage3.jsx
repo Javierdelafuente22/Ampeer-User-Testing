@@ -1,5 +1,4 @@
 // Stage 3 — Post-app (11 numbered + 1 open feedback = 12 panels total).
-// Q11 wording branches on the Stage 1 solar profile.
 // "Back to the app" lets the participant re-enter MainAppShell mid-survey
 // and resume on the same question they left.
 
@@ -9,13 +8,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
   const onNext = () => (q < TOTAL - 1 ? setQuestionIndex(q + 1) : onSubmit());
   const goBack = () => (q > 0 ? setQuestionIndex(q - 1) : undefined);
 
-  // Q11 wording branches on Stage 1 solar profile.
-  const isProsumerOrInterested =
-    responses.solarProfile === 'have_solar' ||
-    responses.solarProfile === 'interested_in_solar';
-  const q11Prompt = isProsumerOrInterested
-    ? 'Would you use an app like this if it were available to you?'
-    : 'Would this app make you more willing to install solar panels?';
+  const q11Prompt = 'Would this app make you more willing to install solar panels?';
 
   const answers = [
     responses.stage3_q1_dataEasyToUnderstand,
@@ -56,7 +49,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
       {q === 0 && (
         <>
           <QuestionHeader index={1} total={TOTAL}
-            prompt="Was the data and information across the app easy to understand?"/>
+            prompt="Did the app make it easy to understand your energy situation?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q1_dataEasyToUnderstand}
             onChange={(v) => update({ stage3_q1_dataEasyToUnderstand: v })}/>
@@ -65,7 +58,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
       {q === 1 && (
         <>
           <QuestionHeader index={2} total={TOTAL}
-            prompt="Did the energy flow animation in the home tab help you understand what was happening in your home?"/>
+            prompt="Did the animation in the home tab help you understand what was happening in your home?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q2_homeAnimationHelped}
             onChange={(v) => update({ stage3_q2_homeAnimationHelped: v })}/>
@@ -161,7 +154,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
         <>
           <QuestionHeader index={12} total={TOTAL}
             prompt="Anything else you'd like to share?"
-            subtitle="Optional — anything that surprised, confused, or delighted you."/>
+            subtitle="Optional — anything that confused or delighted you."/>
           <OpenTextQuestion
             value={responses.stage3_openFeedback || ''}
             onChange={(v) => update({ stage3_openFeedback: v })}/>
@@ -178,8 +171,8 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
               fontSize: 12, color: 'var(--ink-600)', lineHeight: 1.45,
               marginBottom: 10,
             }}>
-              Leave your email if you'd be happy to discuss your experience over a
-              10-minute chat. Completely optional — only used to reach out for this study.
+              Optional — leave your email if you'd be happy to discuss your experience over a
+              10-minute chat. Only used to reach out for this study.
             </div>
             <input
               type="email"

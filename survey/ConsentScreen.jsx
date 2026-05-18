@@ -18,7 +18,7 @@ function ConsentScreen({ onContinue }) {
         padding: '18px 20px',
         display: 'flex', flexDirection: 'column', gap: 14,
       }}>
-        <InfoRow icon="⏱"  title="About 20 minutes" detail="A fun demo and two short questionnaires."/>
+        <InfoRow icon="⏱"  title="About 10–15 minutes" detail="A fun demo and two short questionnaires."/>
         <InfoRow icon="🔒" title="Anonymous"        detail="you don't need to provide email or name."/>
         <InfoRow icon="↩︎" title="You can withdraw any time" detail="Close the tab before the end to stop."/>
         <InfoRow icon="📤" title="What we collect"  detail="Only your answers to the survey questions."/>

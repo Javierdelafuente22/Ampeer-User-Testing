@@ -152,7 +152,7 @@ function PeerwayRoot() {
     return renderInFrame(
       <TransitionScreen
         title="You are about to begin the onboarding experience."
-        subtitle="About 3 minutes. Go through every screen as if you were a real user."
+        subtitle="About 2 minutes. Go through every screen as if you were a real user."
         cta="Start onboarding"
         onContinue={() => setPhase('onboarding')}
       />
@@ -165,6 +165,7 @@ function PeerwayRoot() {
         firstName={displayFirstName}
         fullName={displayFullName}
         initials={displayInitials}
+        userProvidedName={userProvidedName}
         onComplete={() => {
           try { sessionStorage.setItem('pw_onboarded', '1'); } catch (e) {}
           setPhase('transition_to_stage2');
@@ -178,7 +179,7 @@ function PeerwayRoot() {
       <TransitionScreen
         eyebrow="Onboarding complete"
         title="Tell us how that felt."
-        subtitle="5 quick questions about the onboarding experience — about 3 minutes. There are no wrong answers."
+        subtitle="5 quick questions about the onboarding experience — about 2 minutes. There are no wrong answers."
         cta="Start questionnaire"
         onContinue={() => setPhase('stage2')}
       />
@@ -200,7 +201,7 @@ function PeerwayRoot() {
     return renderInFrame(
       <TransitionScreen
         title="Thank you — explore the main app next."
-        subtitle="It will take you about 6 minutes. Once explored, click the button top right to end the demo."
+        subtitle="It will take you about 4 minutes. Once explored, click the button top right to end the demo."
         cta="Open the app"
         onContinue={() => setPhase('app_exploration')}
       />
@@ -228,7 +229,7 @@ function PeerwayRoot() {
       <TransitionScreen
         eyebrow="Demo complete"
         title="One last set of questions."
-        subtitle="12 quick questions about your time in the app — about 6 minutes."
+        subtitle="12 quick questions about your time in the app — about 3 minutes."
         cta="Start questionnaire"
         onContinue={() => setPhase('stage3')}
       />

@@ -87,7 +87,7 @@ create table responses (
   first_name        text,
 
   -- Stage 1 — profile
-  solar_profile     text,
+  age_range         text,
   energy_knowledge  text,
 
   -- Stage 2 — post-onboarding (5 questions)
@@ -157,7 +157,7 @@ clients).
 - **Quick browse**: Supabase dashboard → **Table Editor → responses**.
 - **Query**: SQL Editor, e.g.
   ```sql
-  select created_at, first_name, solar_profile, energy_knowledge,
+  select created_at, first_name, age_range, energy_knowledge,
          stage2_setup_comparison, stage3_dashboard_comparison
     from responses
    order by created_at desc;
@@ -172,6 +172,12 @@ Adding or renaming a question? Update three places:
 2. The mapping in [`survey/submission.js`](survey/submission.js) →
    `mapResponsesToRow`
 3. The question component itself (Stage1/Stage2/Stage3 .jsx)
+
+If your deployed table still has the old `solar_profile` column, rename it:
+
+```sql
+alter table responses rename column solar_profile to age_range;
+```
 
 > **CORS note.** Supabase returns proper CORS headers, so the client knows
 > when a submission succeeded or failed. The fallback screen now only triggers
@@ -235,8 +241,8 @@ Each row in the `responses` table looks like:
 | `duration_seconds`                | `881`                                         |
 | `consent_agreed`                  | `true`                                        |
 | `first_name`                      | `Alex` (or `null` if not provided)            |
-| `solar_profile`                   | `have_solar` / `interested_in_solar` / `not_interested` |
-| `energy_knowledge`                | `a_lot` / `basics` / `very_little`            |
+| `age_range`                       | `18_24` / `25_34` / `35_54` / `55_plus` (nullable — optional) |
+| `energy_knowledge`                | `expert` / `mid` / `non-expert`               |
 | `stage2_simple_onboarding`        | `yes` / `maybe` / `no`                        |
 | `stage2_understood_ampeer`        | `yes` / `maybe` / `no`                        |
 | `stage2_terms_helped_rights`      | `yes` / `maybe` / `no` / `skip`               |

@@ -19,7 +19,7 @@ function mapResponsesToRow(r) {
     first_name:        (r.firstName && r.firstName.trim()) ? r.firstName.trim() : null,
 
     // Stage 1 — profile
-    solar_profile:     r.solarProfile     || null,
+    age_range:         r.ageRange         || null,
     energy_knowledge:  r.energyKnowledge  || null,
 
     // Stage 2 — post-onboarding (5 questions)

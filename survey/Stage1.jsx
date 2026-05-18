@@ -1,15 +1,16 @@
 // Stage 1 — split across two pages so each step feels uncluttered.
-//   Page 1: optional first name + solar profile
+//   Page 1: optional first name + optional age range
 //   Page 2: renewable-energy knowledge level
 
-const STAGE1_SOLAR_OPTIONS = [
-  { value: 'yes_solar',          label: 'Yes' },
-  { value: 'no_solar_yes_interest', label: "No, but I would be interested" },
-  { value: 'no_interest',      label: "No, and I'm not interested" },
+const STAGE1_AGE_OPTIONS = [
+  { value: '18_24', label: '18–24' },
+  { value: '25_34', label: '25–34' },
+  { value: '35_54', label: '35–54' },
+  { value: '55_plus', label: '55+' },
 ];
 
 const STAGE1_KNOWLEDGE_OPTIONS = [
-  { value: 'expert',       label: 'Active — I have a smart home and manage my own energy' },
+  { value: 'expert',       label: 'Active — I have manage my home energywith an app' },
   { value: 'mid',      label: 'Curious - I have looked into it, but have not set anything up yet' },
   { value: 'non-expert', label: 'New to it — Energy is not something I have thought much about' },
 ];
@@ -21,8 +22,10 @@ function Stage1({ responses, update, onComplete, onBack }) {
   const onNext = () => (q < TOTAL - 1 ? setQ(q + 1) : onComplete());
   const goBack = () => (q === 0 ? onBack() : setQ(q - 1));
 
+  // Page 1 is now all optional (name + age range), so Next is always enabled.
+  // Page 2's knowledge question is still required.
   const canContinue =
-    (q === 0 && responses.solarProfile !== undefined) ||
+    q === 0 ||
     (q === 1 && responses.energyKnowledge !== undefined);
 
   return (
@@ -50,12 +53,12 @@ function Stage1({ responses, update, onComplete, onBack }) {
             />
           </Field>
 
-          {/* Solar profile */}
-          <Field label="Do you have solar panels at home?">
+          {/* Age range (optional) */}
+          <Field label="Your age range — optional">
             <ChoiceQuestion
-              options={STAGE1_SOLAR_OPTIONS}
-              value={responses.solarProfile}
-              onChange={(v) => update({ solarProfile: v })}
+              options={STAGE1_AGE_OPTIONS}
+              value={responses.ageRange}
+              onChange={(v) => update({ ageRange: v })}
             />
           </Field>
         </>

@@ -2,6 +2,16 @@
 // "you're about to begin a new part of the study."
 
 function TransitionScreen({ title, subtitle, cta, onContinue, eyebrow = 'Next up' }) {
+  // Match the iOS status-bar tint to the forest gradient's top so the area
+  // behind the time/wifi/battery icons isn't a cream stripe.
+  React.useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) return;
+    const prev = meta.getAttribute('content');
+    meta.setAttribute('content', '#07160F');
+    return () => { meta.setAttribute('content', prev); };
+  }, []);
+
   return (
     <div className="pw-fade-in" style={{
       width: '100%', height: '100%',
@@ -9,7 +19,7 @@ function TransitionScreen({ title, subtitle, cta, onContinue, eyebrow = 'Next up
       background: 'linear-gradient(170deg, var(--forest-900) 0%, var(--forest-700) 60%, var(--forest-600) 100%)',
       color: '#F2EFE7',
       display: 'flex', flexDirection: 'column',
-      padding: '64px 24px 32px',
+      padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px)',
       boxSizing: 'border-box',
       position: 'relative',
       overflow: 'hidden',

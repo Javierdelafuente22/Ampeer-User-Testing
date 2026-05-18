@@ -10,8 +10,8 @@ const STAGE1_AGE_OPTIONS = [
 ];
 
 const STAGE1_KNOWLEDGE_OPTIONS = [
-  { value: 'expert',       label: 'Active — I have manage my home energywith an app' },
-  { value: 'mid',      label: 'Curious - I have looked into it, but have not set anything up yet' },
+  { value: 'expert',       label: 'Active — I have managed my home with an app before' },
+  { value: 'mid',      label: 'Curious — I have looked into it, but have not set anything up yet' },
   { value: 'non-expert', label: 'New to it — Energy is not something I have thought much about' },
 ];
 

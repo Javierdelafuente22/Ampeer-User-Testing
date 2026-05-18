@@ -28,8 +28,16 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
 
   return (
     <PwScreen step={q} totalSteps={TOTAL} onBack={q > 0 ? goBack : undefined}>
-      {/* "Back to the app" link */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+      {/* Eyebrow + "Back to the app" link on the same row. */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 12, marginBottom: 12,
+      }}>
+        <div className="t-label" style={{
+          color: 'var(--lime-600)', fontSize: 13, fontWeight: 600,
+        }}>
+          Question {q + 1} of {TOTAL}
+        </div>
         <button onClick={onBackToApp} style={{
           appearance: 'none', cursor: 'pointer',
           border: '1px solid var(--cream-200)',
@@ -40,6 +48,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
           fontFamily: 'var(--font-sans)',
           display: 'inline-flex', alignItems: 'center', gap: 6,
           letterSpacing: '-0.005em',
+          flexShrink: 0,
         }}>
           <IconExternal size={12}/>
           Back to the app
@@ -48,7 +57,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
 
       {q === 0 && (
         <>
-          <QuestionHeader index={1} total={TOTAL}
+          <QuestionHeader index={1} total={TOTAL} hideEyebrow
             prompt="Did the app make it easy to understand your energy situation?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q1_dataEasyToUnderstand}
@@ -57,25 +66,27 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
       )}
       {q === 1 && (
         <>
-          <QuestionHeader index={2} total={TOTAL}
+          <QuestionHeader index={2} total={TOTAL} hideEyebrow
             prompt="Did the animation in the home tab help you understand what was happening in your home?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q2_homeAnimationHelped}
             onChange={(v) => update({ stage3_q2_homeAnimationHelped: v })}/>
+          <ExplanatoryScreenshot src="survey-screenshots/q2.png" alt="Home tab animation"/>
         </>
       )}
       {q === 2 && (
         <>
-          <QuestionHeader index={3} total={TOTAL}
+          <QuestionHeader index={3} total={TOTAL} hideEyebrow
             prompt="Was the pricing in the home tab clear and easy to understand?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q3_homePricingClear}
             onChange={(v) => update({ stage3_q3_homePricingClear: v })}/>
+          <ExplanatoryScreenshot src="survey-screenshots/q3.png" alt="Home tab pricing"/>
         </>
       )}
       {q === 3 && (
         <>
-          <QuestionHeader index={4} total={TOTAL}
+          <QuestionHeader index={4} total={TOTAL} hideEyebrow
             prompt="Which home energy overview feels easier to use at a glance?"/>
           <ComparisonQuestion
             ampeerImage="survey-screenshots/ampeer-home.png"
@@ -86,25 +97,27 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
       )}
       {q === 4 && (
         <>
-          <QuestionHeader index={5} total={TOTAL}
+          <QuestionHeader index={5} total={TOTAL} hideEyebrow
             prompt="Did the community tab give you a sense of being part of a local energy network?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q5_communitySense}
             onChange={(v) => update({ stage3_q5_communitySense: v })}/>
+          <ExplanatoryScreenshot src="survey-screenshots/q5.png" alt="Community tab"/>
         </>
       )}
       {q === 5 && (
         <>
-          <QuestionHeader index={6} total={TOTAL}
+          <QuestionHeader index={6} total={TOTAL} hideEyebrow
             prompt="Did the weekly report and notifications in the dashboard help you understand your energy activity?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q6_dashboardReportsUseful}
             onChange={(v) => update({ stage3_q6_dashboardReportsUseful: v })}/>
+          <ExplanatoryScreenshot src="survey-screenshots/q6.png" alt="Dashboard reports"/>
         </>
       )}
       {q === 6 && (
         <>
-          <QuestionHeader index={7} total={TOTAL}
+          <QuestionHeader index={7} total={TOTAL} hideEyebrow
             prompt="Which dashboard shows information that would be most useful to you?"/>
           <ComparisonQuestion
             ampeerImage="survey-screenshots/ampeer-dashboard.png"
@@ -115,36 +128,37 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
       )}
       {q === 7 && (
         <>
-          <QuestionHeader index={8} total={TOTAL}
+          <QuestionHeader index={8} total={TOTAL} hideEyebrow
             prompt="Did the AI assistant feel useful and trustworthy?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q8_assistantTrustworthy}
-            onChange={(v) => update({ stage3_q8_assistantTrustworthy: v })}
-            skipLabel="Skip — I didn't use the AI assistant"/>
+            onChange={(v) => update({ stage3_q8_assistantTrustworthy: v })}/>
+          <ExplanatoryScreenshot src="survey-screenshots/q8.png" alt="AI assistant"/>
         </>
       )}
       {q === 8 && (
         <>
-          <QuestionHeader index={9} total={TOTAL}
+          <QuestionHeader index={9} total={TOTAL} hideEyebrow
             prompt="Did the smart mode in the AI assistant feel respectful to your privacy?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q9_smartModeRespectfulPrivacy}
-            onChange={(v) => update({ stage3_q9_smartModeRespectfulPrivacy: v })}
-            skipLabel="Skip — I didn't use smart mode"/>
+            onChange={(v) => update({ stage3_q9_smartModeRespectfulPrivacy: v })}/>
+          <ExplanatoryScreenshot src="survey-screenshots/q9.png" alt="Smart mode"/>
         </>
       )}
       {q === 9 && (
         <>
-          <QuestionHeader index={10} total={TOTAL}
-            prompt="Did the Profile tab give you the support and information you needed?"/>
+          <QuestionHeader index={10} total={TOTAL} hideEyebrow
+            prompt="Did the Profile tab give you the support you needed?"/>
           <YesMaybeNoQuestion
             value={responses.stage3_q10_profileSupport}
             onChange={(v) => update({ stage3_q10_profileSupport: v })}/>
+          <ExplanatoryScreenshot src="survey-screenshots/q10.png" alt="Profile tab"/>
         </>
       )}
       {q === 10 && (
         <>
-          <QuestionHeader index={11} total={TOTAL} prompt={q11Prompt}/>
+          <QuestionHeader index={11} total={TOTAL} hideEyebrow prompt={q11Prompt}/>
           <YesMaybeNoQuestion
             value={responses.stage3_q11_appWillingnessSolar}
             onChange={(v) => update({ stage3_q11_appWillingnessSolar: v })}/>
@@ -152,12 +166,12 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
       )}
       {q === 11 && (
         <>
-          <QuestionHeader index={12} total={TOTAL}
-            prompt="Anything else you'd like to share?"
-            subtitle="Optional — anything that confused or delighted you."/>
+          <QuestionHeader index={12} total={TOTAL} hideEyebrow
+            prompt="Anything else you'd like to share?"/>
           <OpenTextQuestion
             value={responses.stage3_openFeedback || ''}
-            onChange={(v) => update({ stage3_openFeedback: v })}/>
+            onChange={(v) => update({ stage3_openFeedback: v })}
+            placeholder="Optional — anything that confused or delighted you?"/>
 
           {/* Optional follow-up email */}
           <div style={{ marginTop: 24 }}>

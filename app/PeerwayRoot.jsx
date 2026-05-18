@@ -127,6 +127,7 @@ function PeerwayRoot() {
         firstName={displayFirstName}
         fullName={displayFullName}
         initials={displayInitials}
+        userProvidedName={userProvidedName}
         initialTab={tabForStage3Q(stage3Q)}
         tabsVisited={tabsVisited}
         onTabVisit={(id) => {
@@ -176,6 +177,7 @@ function PeerwayRoot() {
         fullName={displayFullName}
         initials={displayInitials}
         userProvidedName={userProvidedName}
+        userProvidedName={userProvidedName}
         onComplete={() => {
           try { sessionStorage.setItem('pw_onboarded', '1'); } catch (e) {}
           setPhase('transition_to_stage2');
@@ -224,6 +226,7 @@ function PeerwayRoot() {
         firstName={displayFirstName}
         fullName={displayFullName}
         initials={displayInitials}
+        userProvidedName={userProvidedName}
         tabsVisited={tabsVisited}
         onTabVisit={(id) => {
           setTabsVisited(prev => prev.includes(id) ? prev : [...prev, id]);

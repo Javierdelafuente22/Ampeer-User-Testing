@@ -68,27 +68,19 @@ function YesMaybeNoQuestion({ value, onChange, skipLabel }) {
               onClick={() => onChange(opt.value)}
               style={{
                 appearance: 'none', cursor: 'pointer',
-                padding: '20px 12px',
+                padding: '16px 12px',
                 borderRadius: 'var(--r-md)',
                 background: selected ? 'var(--ink-900)' : 'var(--surface)',
                 color: selected ? '#fff' : 'var(--ink-900)',
                 border: '1px solid ' + (selected ? 'var(--ink-900)' : 'var(--cream-200)'),
+                boxShadow: selected ? '0 0 0 2px var(--lime-500)' : 'none',
                 fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600,
                 letterSpacing: '-0.005em',
-                transition: 'background .15s, color .15s, border-color .15s',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                transition: 'background .15s, color .15s, border-color .15s, box-shadow .15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <span>{opt.label}</span>
-              {/* Reserve check-icon space on every button so when one is
-                  selected, the labels stay vertically aligned across the row. */}
-              <span style={{
-                color: 'var(--lime-400)',
-                display: 'flex',
-                visibility: selected ? 'visible' : 'hidden',
-              }}>
-                <IconCheck size={14}/>
-              </span>
+              {opt.label}
             </button>
           );
         })}
@@ -349,6 +341,65 @@ function Lightbox({ src, label, onClose }) {
   return ReactDOM.createPortal(content, document.body);
 }
 
+// Single centred reference screenshot — shown below a YMN question to remind
+// the participant where the feature lives in the app. ~60% of the canvas wide,
+// no footer label, tap-to-zoom via the same Lightbox as ComparisonQuestion.
+function ExplanatoryScreenshot({ src, alt = 'Reference screenshot' }) {
+  const [expanded, setExpanded] = React.useState(false);
+  const [hov, setHov] = React.useState(false);
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+      <button
+        type="button"
+        onClick={() => setExpanded(true)}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        aria-label={`Zoom in: ${alt}`}
+        style={{
+          appearance: 'none', cursor: 'pointer',
+          padding: 0, textAlign: 'left',
+          width: 'calc(50% - 6px)',
+          background: 'var(--surface)',
+          border: '1px solid ' + (hov ? 'var(--ink-900)' : 'var(--cream-200)'),
+          borderRadius: 'var(--r-md)',
+          overflow: 'hidden',
+          display: 'flex', flexDirection: 'column',
+          fontFamily: 'var(--font-sans)',
+          boxShadow: hov ? '0 6px 20px rgba(10,12,11,0.10)' : 'none',
+          transform: hov ? 'translateY(-1px)' : 'none',
+          transition: 'box-shadow .15s, transform .15s, border-color .15s',
+        }}
+      >
+        <div style={{
+          position: 'relative',
+          width: '100%', aspectRatio: '9 / 16',
+          background: 'var(--cream-100)',
+        }}>
+          <img
+            src={src}
+            alt={alt}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+          <div style={{
+            position: 'absolute', top: 6, right: 6,
+            width: 24, height: 24, borderRadius: 999,
+            background: 'rgba(10,12,11,0.55)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: 12,
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+          }}>
+            🔍
+          </div>
+        </div>
+      </button>
+      {expanded && (
+        <Lightbox src={src} label={alt} onClose={() => setExpanded(false)}/>
+      )}
+    </div>
+  );
+}
+
 function OpenTextQuestion({ value, onChange, placeholder = 'Optional — anything else on your mind?' }) {
   return (
     <textarea
@@ -368,4 +419,4 @@ function OpenTextQuestion({ value, onChange, placeholder = 'Optional — anythin
   );
 }
 
-Object.assign(window, { ChoiceQuestion, YesMaybeNoQuestion, ComparisonQuestion, OpenTextQuestion });
+Object.assign(window, { ChoiceQuestion, YesMaybeNoQuestion, ComparisonQuestion, ExplanatoryScreenshot, OpenTextQuestion });

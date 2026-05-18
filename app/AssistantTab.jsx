@@ -29,13 +29,16 @@ function SmartModeButton({ onClick }) {
 }
 
 // Assistant tab — chat with AI trading agent. Mission-check pattern.
-function AssistantTab({ firstName = 'Sarah' }) {
+function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
+  // Address the participant by name only when they actually gave one in Stage 1.
+  // Otherwise drop the name entirely (don't pretend the user is "Sarah").
+  const addressee = userProvidedName ? ` ${firstName}` : '';
   const [messages, setMessages] = React.useState(() => {
     const t = nowBST();
     return [
       {
         role: 'ai', type: 'greeting',
-        text: `Hi ${firstName} — I'm your trading agent. I keep an eye on prices and trade your surplus to earn you a bit extra. Tell me about your week and I'll plan around it.`,
+        text: `Hi${addressee} — I'm your trading agent. I keep an eye on prices and trade your surplus to earn you a bit extra. Tell me about your week and I'll plan around it.`,
         ts: t,
       },
       {
@@ -137,11 +140,12 @@ function AssistantTab({ firstName = 'Sarah' }) {
     const t = text.toLowerCase();
     const greetingOnly = t.trim().replace(/[.!?]+$/, '');
 
-    // 0) GREETINGS — "hi", "hello", "hey there", etc.
-    if (/^(hi|hello|hey|hiya|howdy|hola|sup|yo|greetings|gm|good\s+(morning|afternoon|evening|day)|hi\s+there|hello\s+there|hey\s+there|what'?s\s+up)$/.test(greetingOnly)) {
+    // 0) GREETINGS — "hi", "hellooo", "heyyy", etc. Trailing letters allowed
+    // on hi / hello / hey / yo / hola / hiya so casual variants still match.
+    if (/^(hello+|hi+ya+|hi+|hey+|howdy+|hola+|sup+|yo+|greetings+|gm|good\s+(morning|afternoon|evening|day)|hi+\s+there|hello+\s+there|hey+\s+there|what'?s\s+up)$/.test(greetingOnly)) {
       return {
         role: 'ai', type: 'message', ts: 'now',
-        text: `Hi ${firstName} — what would you like me to plan around today? I can help with holidays, your work schedule, or EV charging.`,
+        text: `Hi${addressee} — what would you like me to plan around today? I can help with holidays, your work schedule, or EV charging.`,
       };
     }
 

@@ -68,6 +68,7 @@ function useWeatherState() {
 function MainAppShell({
   tabsVisited = [], onTabVisit, endStudyMode, onEndStudy,
   firstName = 'Sarah', fullName = 'Sarah Chen', initials = 'SC',
+  userProvidedName = false,
   initialTab = 'home',
 }) {
   const [tab, setTab] = React.useState(initialTab);
@@ -125,7 +126,7 @@ function MainAppShell({
   // It is shown/hidden via display rather than remounted on tab switch.
   const assistantLayer = (style) => (
     <div style={{ position: 'absolute', inset: 0, display: tab === 'assistant' ? 'flex' : 'none', flexDirection: 'column', ...style }}>
-      <AssistantTab firstName={firstName}/>
+      <AssistantTab firstName={firstName} userProvidedName={userProvidedName}/>
       <TabBar active={tab} onChange={handleSetTab}/>
     </div>
   );

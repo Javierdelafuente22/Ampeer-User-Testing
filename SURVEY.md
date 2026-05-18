@@ -108,8 +108,8 @@ create table responses (
   stage3_community_sense           text,  -- yes / maybe / no
   stage3_dashboard_reports_useful  text,  -- yes / maybe / no
   stage3_dashboard_comparison      text,  -- ampeer / about_the_same / enphase
-  stage3_assistant_trustworthy     text,  -- yes / maybe / no / skip
-  stage3_smart_mode_respectful_privacy text,  -- yes / maybe / no / skip
+  stage3_assistant_trustworthy     text,  -- yes / maybe / no
+  stage3_smart_mode_respectful_privacy text,  -- yes / maybe / no
   stage3_profile_support           text,  -- yes / maybe / no
   stage3_app_willingness_solar     text,  -- yes / maybe / no
   stage3_open_feedback             text,
@@ -264,8 +264,8 @@ Each row in the `responses` table looks like:
 | `stage3_community_sense`          | `yes` / `maybe` / `no`                        |
 | `stage3_dashboard_reports_useful` | `yes` / `maybe` / `no`                        |
 | `stage3_dashboard_comparison`     | `ampeer` / `about_the_same` / `enphase`       |
-| `stage3_assistant_trustworthy`    | `yes` / `maybe` / `no` / `skip`               |
-| `stage3_smart_mode_respectful_privacy` | `yes` / `maybe` / `no` / `skip`          |
+| `stage3_assistant_trustworthy`    | `yes` / `maybe` / `no`                        |
+| `stage3_smart_mode_respectful_privacy` | `yes` / `maybe` / `no`                   |
 | `stage3_profile_support`          | `yes` / `maybe` / `no`                        |
 | `stage3_app_willingness_solar`    | `yes` / `maybe` / `no`                        |
 | `stage3_open_feedback`            | free text (nullable)                          |

@@ -1,14 +1,16 @@
 // Shared survey primitives — reuse Ampeer's PwButton, PwScreen, PwProgress, etc.,
 // but provide a couple of survey-specific helpers (QuestionHeader, EndStudyButton).
 
-function QuestionHeader({ index, total, prompt, subtitle }) {
+function QuestionHeader({ index, total, prompt, subtitle, hideEyebrow }) {
   return (
     <div style={{ marginBottom: 22 }}>
-      <div className="t-label" style={{
-        color: 'var(--lime-600)', marginBottom: 8, fontSize: 13, fontWeight: 600,
-      }}>
-        Question {index} of {total}
-      </div>
+      {!hideEyebrow && (
+        <div className="t-label" style={{
+          color: 'var(--lime-600)', marginBottom: 8, fontSize: 13, fontWeight: 600,
+        }}>
+          Question {index} of {total}
+        </div>
+      )}
       <h2 className="t-title" style={{
         fontSize: 26, lineHeight: 1.15, margin: '0 0 8px',
         color: 'var(--ink-900)', fontWeight: 600, letterSpacing: '-0.025em',

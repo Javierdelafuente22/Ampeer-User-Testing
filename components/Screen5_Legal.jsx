@@ -1,5 +1,7 @@
-// Screen 5 — Legal + consent with expandable detail panels
-function Screen5_Legal({ onNext, onBack }) {
+// Screen 5 — Legal + consent with expandable detail panels.
+// When `readOnly` is true, this is reused from Stage 2 as a static reference:
+// no checkbox, no Accept & continue, and the CTA returns to the survey.
+function Screen5_Legal({ onNext, onBack, readOnly = false, returnLabel = 'Accept & continue' }) {
   const [agreed, setAgreed] = React.useState(false);
   const [openItem, setOpenItem] = React.useState(null);
 
@@ -99,7 +101,7 @@ function Screen5_Legal({ onNext, onBack }) {
             padding: '4px 0',
           }}>
             <IconChevron dir="left" size={16}/>
-            <span>Back to consent</span>
+            <span>{readOnly ? 'Back to terms' : 'Back to consent'}</span>
           </button>
         </div>
 
@@ -131,20 +133,22 @@ function Screen5_Legal({ onNext, onBack }) {
   }
 
   return (
-    <PwScreen step={4} onBack={onBack}>
+    <PwScreen step={readOnly ? undefined : 4} onBack={readOnly ? undefined : onBack}>
       <PwPageTitle
-        eyebrow="Step 4 of 4 — Consent"
+        eyebrow={readOnly ? 'Reference' : 'Step 4 of 4 — Consent'}
         title="Terms, in plain English."
         subtitle="The short version of how your data is handled is below."
         size={32}
       />
 
-      {/* Reassurance */}
-      <div style={{ marginTop: 4 }}>
-        <PwReassurance title="Why Ampeer saves you money.">
-          Trading with peers means you buy for less and sell for more versus a standard grid tariff.
-        </PwReassurance>
-      </div>
+      {/* Reassurance — onboarding only */}
+      {!readOnly && (
+        <div style={{ marginTop: 4 }}>
+          <PwReassurance title="Why Ampeer saves you money.">
+            Trading with peers means you buy for less and sell for more versus a standard grid tariff.
+          </PwReassurance>
+        </div>
+      )}
 
       {/* List of legal items */}
       <div className="pw-card" style={{ marginTop: 20, overflow: 'hidden' }}>
@@ -177,38 +181,44 @@ function Screen5_Legal({ onNext, onBack }) {
         ))}
       </div>
 
-      {/* Consent checkbox */}
-      <button
-        type="button"
-        onClick={() => setAgreed(a => !a)}
-        style={{
-          appearance: 'none', width: '100%', textAlign: 'left', cursor: 'pointer',
-          marginTop: 20, display: 'flex', gap: 12, alignItems: 'flex-start',
-          padding: '14px 16px',
-          background: agreed ? 'var(--lime-50)' : 'var(--surface)',
-          border: `1px solid ${agreed ? 'var(--lime-500)' : 'var(--cream-200)'}`,
-          borderRadius: 'var(--r-md)',
-          transition: 'background .18s, border-color .18s',
-          fontFamily: 'var(--font-sans)',
-        }}>
-        <div style={{
-          width: 22, height: 22, borderRadius: 6,
-          border: `1.5px solid ${agreed ? 'var(--ink-900)' : 'var(--ink-300)'}`,
-          background: agreed ? 'var(--ink-900)' : 'transparent',
-          flexShrink: 0, marginTop: 1,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all .16s',
-        }}>
-          {agreed && <span style={{ color: 'var(--lime-400)', display: 'flex' }}><IconCheck size={14}/></span>}
-        </div>
-        <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--ink-700)' }}>
-          I agree to Ampeer's Terms and Privacy policy, and consent to automated trading.
-        </span>
-      </button>
+      {/* Consent checkbox — onboarding only */}
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={() => setAgreed(a => !a)}
+          style={{
+            appearance: 'none', width: '100%', textAlign: 'left', cursor: 'pointer',
+            marginTop: 20, display: 'flex', gap: 12, alignItems: 'flex-start',
+            padding: '14px 16px',
+            background: agreed ? 'var(--lime-50)' : 'var(--surface)',
+            border: `1px solid ${agreed ? 'var(--lime-500)' : 'var(--cream-200)'}`,
+            borderRadius: 'var(--r-md)',
+            transition: 'background .18s, border-color .18s',
+            fontFamily: 'var(--font-sans)',
+          }}>
+          <div style={{
+            width: 22, height: 22, borderRadius: 6,
+            border: `1.5px solid ${agreed ? 'var(--ink-900)' : 'var(--ink-300)'}`,
+            background: agreed ? 'var(--ink-900)' : 'transparent',
+            flexShrink: 0, marginTop: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .16s',
+          }}>
+            {agreed && <span style={{ color: 'var(--lime-400)', display: 'flex' }}><IconCheck size={14}/></span>}
+          </div>
+          <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--ink-700)' }}>
+            I agree to Ampeer's Terms and Privacy policy, and consent to automated trading.
+          </span>
+        </button>
+      )}
 
       <div style={{ marginTop: 20 }}>
-        <PwButton onClick={onNext} disabled={!agreed} icon={<IconArrowRight size={16}/>}>
-          Accept & continue
+        <PwButton
+          onClick={onNext}
+          disabled={readOnly ? false : !agreed}
+          icon={<IconArrowRight size={16}/>}
+        >
+          {readOnly ? returnLabel : 'Accept & continue'}
         </PwButton>
       </div>
     </PwScreen>

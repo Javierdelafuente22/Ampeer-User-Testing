@@ -112,12 +112,22 @@ function PeerwayRoot() {
   // ─────────────────────── routing ───────────────────────
 
   // Stage 3 "Back to the app" mode — render MainAppShell with a Return CTA.
+  // Land on the tab most relevant to the current question, so the participant
+  // doesn't waste time re-navigating to verify their answer.
   if (phase === 'stage3' && stage3RevisitingApp) {
+    const tabForStage3Q = (qi) => {
+      if (qi === 4) return 'community';                  // Q5 community sense
+      if (qi === 5 || qi === 6) return 'dashboard';      // Q6/Q7 dashboard
+      if (qi === 7 || qi === 8) return 'assistant';      // Q8/Q9 assistant + smart mode
+      if (qi === 9) return 'profile';                    // Q10 profile
+      return 'home';
+    };
     return (
       <MainAppShell
         firstName={displayFirstName}
         fullName={displayFullName}
         initials={displayInitials}
+        initialTab={tabForStage3Q(stage3Q)}
         tabsVisited={tabsVisited}
         onTabVisit={(id) => {
           setTabsVisited(prev => prev.includes(id) ? prev : [...prev, id]);

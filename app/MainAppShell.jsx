@@ -68,8 +68,9 @@ function useWeatherState() {
 function MainAppShell({
   tabsVisited = [], onTabVisit, endStudyMode, onEndStudy,
   firstName = 'Sarah', fullName = 'Sarah Chen', initials = 'SC',
+  initialTab = 'home',
 }) {
-  const [tab, setTab] = React.useState('home');
+  const [tab, setTab] = React.useState(initialTab);
   const [communityHighlight, setCommunityHighlight] = React.useState(false);
   const [homeHighlight, setHomeHighlight] = React.useState(true);
   const weatherState = useWeatherState();

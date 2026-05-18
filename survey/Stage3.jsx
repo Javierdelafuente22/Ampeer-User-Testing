@@ -19,7 +19,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
     responses.stage3_q6_dashboardReportsUseful,
     responses.stage3_q7_dashboardComparison,
     responses.stage3_q8_assistantTrustworthy,
-    responses.stage3_q9_smartModeIntrusive,
+    responses.stage3_q9_smartModeRespectfulPrivacy,
     responses.stage3_q10_profileSupport,
     responses.stage3_q11_appWillingnessSolar,
   ];
@@ -126,10 +126,10 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
       {q === 8 && (
         <>
           <QuestionHeader index={9} total={TOTAL}
-            prompt="Did the smart mode in the AI assistant feel intrusive?"/>
+            prompt="Did the smart mode in the AI assistant feel respectful to your privacy?"/>
           <YesMaybeNoQuestion
-            value={responses.stage3_q9_smartModeIntrusive}
-            onChange={(v) => update({ stage3_q9_smartModeIntrusive: v })}
+            value={responses.stage3_q9_smartModeRespectfulPrivacy}
+            onChange={(v) => update({ stage3_q9_smartModeRespectfulPrivacy: v })}
             skipLabel="Skip — I didn't use smart mode"/>
         </>
       )}

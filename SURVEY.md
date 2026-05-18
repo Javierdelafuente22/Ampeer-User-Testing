@@ -93,7 +93,7 @@ create table responses (
   -- Stage 2 — post-onboarding (5 questions)
   stage2_simple_onboarding    text,  -- yes / maybe / no
   stage2_understood_ampeer    text,  -- yes / maybe / no
-  stage2_terms_helped_rights  text,  -- yes / maybe / no / skip
+  stage2_terms_helped_rights  text,  -- yes / maybe / no
   stage2_setup_comparison     text,  -- ampeer / about_the_same / enphase
   stage2_terms_comparison     text,  -- ampeer / about_the_same / enphase
 
@@ -109,7 +109,7 @@ create table responses (
   stage3_dashboard_reports_useful  text,  -- yes / maybe / no
   stage3_dashboard_comparison      text,  -- ampeer / about_the_same / enphase
   stage3_assistant_trustworthy     text,  -- yes / maybe / no / skip
-  stage3_smart_mode_intrusive      text,  -- yes / maybe / no / skip
+  stage3_smart_mode_respectful_privacy text,  -- yes / maybe / no / skip
   stage3_profile_support           text,  -- yes / maybe / no
   stage3_app_willingness_solar     text,  -- yes / maybe / no
   stage3_open_feedback             text,
@@ -179,6 +179,14 @@ If your deployed table still has the old `solar_profile` column, rename it:
 alter table responses rename column solar_profile to age_range;
 ```
 
+If your deployed table still has the old `stage3_smart_mode_intrusive` column,
+rename it (the question wording was flipped to ask about privacy respect):
+
+```sql
+alter table responses rename column stage3_smart_mode_intrusive
+  to stage3_smart_mode_respectful_privacy;
+```
+
 > **CORS note.** Supabase returns proper CORS headers, so the client knows
 > when a submission succeeded or failed. The fallback screen now only triggers
 > on real failures.
@@ -245,7 +253,7 @@ Each row in the `responses` table looks like:
 | `energy_knowledge`                | `expert` / `mid` / `non-expert`               |
 | `stage2_simple_onboarding`        | `yes` / `maybe` / `no`                        |
 | `stage2_understood_ampeer`        | `yes` / `maybe` / `no`                        |
-| `stage2_terms_helped_rights`      | `yes` / `maybe` / `no` / `skip`               |
+| `stage2_terms_helped_rights`      | `yes` / `maybe` / `no`                        |
 | `stage2_setup_comparison`         | `ampeer` / `about_the_same` / `enphase`       |
 | `stage2_terms_comparison`         | `ampeer` / `about_the_same` / `enphase`       |
 | `app_tabs_visited`                | `{home,community,dashboard,assistant,profile}` (Postgres text[]) |
@@ -257,7 +265,7 @@ Each row in the `responses` table looks like:
 | `stage3_dashboard_reports_useful` | `yes` / `maybe` / `no`                        |
 | `stage3_dashboard_comparison`     | `ampeer` / `about_the_same` / `enphase`       |
 | `stage3_assistant_trustworthy`    | `yes` / `maybe` / `no` / `skip`               |
-| `stage3_smart_mode_intrusive`     | `yes` / `maybe` / `no` / `skip`               |
+| `stage3_smart_mode_respectful_privacy` | `yes` / `maybe` / `no` / `skip`          |
 | `stage3_profile_support`          | `yes` / `maybe` / `no`                        |
 | `stage3_app_willingness_solar`    | `yes` / `maybe` / `no`                        |
 | `stage3_open_feedback`            | free text (nullable)                          |

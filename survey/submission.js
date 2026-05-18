@@ -41,7 +41,7 @@ function mapResponsesToRow(r) {
     stage3_dashboard_reports_useful:    r.stage3_q6_dashboardReportsUseful     || null,
     stage3_dashboard_comparison:        r.stage3_q7_dashboardComparison        || null,
     stage3_assistant_trustworthy:       r.stage3_q8_assistantTrustworthy       || null,
-    stage3_smart_mode_intrusive:        r.stage3_q9_smartModeIntrusive         || null,
+    stage3_smart_mode_respectful_privacy: r.stage3_q9_smartModeRespectfulPrivacy || null,
     stage3_profile_support:             r.stage3_q10_profileSupport            || null,
     stage3_app_willingness_solar:       r.stage3_q11_appWillingnessSolar       || null,
     stage3_open_feedback:               (r.stage3_openFeedback && r.stage3_openFeedback.trim())

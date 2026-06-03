@@ -1,4 +1,4 @@
-# Ampeer
+# Ampeer user testing
 
 A user study for the UI testing of **Ampeer**, a mobile app prototype for peer-to-peer solar energy trading. The repository contains both the survey wrapper that records participant feedback to Supabase and the full interactive prototype the participants test.
 

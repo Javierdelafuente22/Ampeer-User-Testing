@@ -1,4 +1,5 @@
-// Loading state — used between screens when the app is "thinking"
+// Generic spinner screen shown while the preview app is "thinking".
+// Used by the tweaks panel to demonstrate the loading visual.
 function LoadingState({ label = 'Connecting securely', sublabel = 'This usually takes a few seconds' }) {
   return (
     <div className="pw-screen pw-fade-in" style={{
@@ -79,7 +80,8 @@ function LoadingState({ label = 'Connecting securely', sublabel = 'This usually 
   );
 }
 
-// Error state — meter connection failed, with recovery path
+// Generic error screen shown when the (mock) meter connection fails.
+// Offers a retry and a "set up manually" escape hatch.
 function ErrorState({ onRetry, onSkip }) {
   return (
     <PwScreen step={0}>

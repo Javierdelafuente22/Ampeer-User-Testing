@@ -1,5 +1,6 @@
-// Submitting / Complete / Fallback screens after Stage 3 submit.
+// The three end-of-survey screens shown after the participant taps Submit.
 
+// Spinner shown while the POST to Supabase is in flight.
 function SubmittingScreen() {
   return (
     <PwScreen>
@@ -33,6 +34,7 @@ function SubmittingScreen() {
   );
 }
 
+// Thank-you screen shown after a successful submission.
 function CompleteScreen() {
   return (
     <PwScreen>
@@ -104,6 +106,8 @@ function CompleteScreen() {
   );
 }
 
+// Shown when the submission POST fails. Lets the participant retry or
+// copy their answers as JSON so the researcher can record them by hand.
 function FallbackScreen({ responses, error, onRetry }) {
   const json = JSON.stringify(responses, null, 2);
   const copy = async () => {

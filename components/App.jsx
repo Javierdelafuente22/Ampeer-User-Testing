@@ -1,6 +1,9 @@
-// Main App — orchestrates the 6-screen flow + loading/error states
-// Inside iOS frame, with Tweaks panel for host integration.
+// Standalone preview of the six onboarding screens used when the file is
+// loaded outside the survey shell. Renders the phone inside an iOS frame
+// with design-system rails either side and a tweaks panel for the
+// editor host. The full app is wired up by app/PeerwayRoot.jsx.
 
+// EDITMODE markers let the host editor patch these defaults in place.
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "showLoadingState": false,
   "showErrorState": false,
@@ -9,7 +12,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "startScreen": 0
 }/*EDITMODE-END*/;
 
-// Accent hue remapping — swaps forest CSS vars at runtime
+// Each accent option overrides the same set of CSS custom properties.
 const ACCENT_MAP = {
   forest:   { 900:'#0E2A1F', 800:'#153826', 700:'#1F4A37', 600:'#27593F', 500:'#2F6B50', 300:'#7FA291', sage100:'#E8EFE9', sage50:'#F1F5F1' },
   emerald:  { 900:'#06281A', 800:'#0B3A26', 700:'#126B42', 600:'#18835A', 500:'#1FA06B', 300:'#7EC9A8', sage100:'#DFEFE6', sage50:'#EEF8F2' },
@@ -17,6 +20,7 @@ const ACCENT_MAP = {
   copper:   { 900:'#2B1409', 800:'#3A1D0F', 700:'#8A4422', 600:'#A0522B', 500:'#B86738', 300:'#D4A484', sage100:'#F3E4D7', sage50:'#FAF2EA' },
 };
 
+// Writes the chosen accent palette to the document root.
 function applyAccent(hue) {
   const c = ACCENT_MAP[hue] || ACCENT_MAP.forest;
   const root = document.documentElement.style;
@@ -30,6 +34,8 @@ function applyAccent(hue) {
   root.setProperty('--sage-50',  c.sage50);
 }
 
+// Top-level preview app: holds onboarding step, tweak values, and the
+// internal display mode (flow / loading / error / done).
 function PeerwayApp() {
   const [tweaks, setTweaks] = React.useState(TWEAK_DEFAULTS);
   const [editMode, setEditMode] = React.useState(false);
@@ -38,19 +44,20 @@ function PeerwayApp() {
     return Number.isFinite(saved) ? saved : (tweaks.startScreen || 0);
   });
   const [state, setState] = React.useState({});
-  const [internalMode, setInternalMode] = React.useState('flow'); // 'flow' | 'loading' | 'error' | 'done'
+  const [internalMode, setInternalMode] = React.useState('flow');
 
   React.useEffect(() => localStorage.setItem('pw_step', String(step)), [step]);
   React.useEffect(() => applyAccent(tweaks.accentHue), [tweaks.accentHue]);
 
-  // Override internal mode from tweaks (tweaks win when explicitly set)
+  // Tweak toggles override the internal mode while they're on.
   React.useEffect(() => {
     if (tweaks.showLoadingState) setInternalMode('loading');
     else if (tweaks.showErrorState) setInternalMode('error');
     else setInternalMode('flow');
   }, [tweaks.showLoadingState, tweaks.showErrorState]);
 
-  // Tweaks protocol wiring — listener registered FIRST, announcement second.
+  // Listen for the host editor's messages, then announce that we're ready.
+  // Order matters: register the listener before posting the "available" event.
   React.useEffect(() => {
     const onMsg = (e) => {
       const d = e.data || {};
@@ -80,7 +87,7 @@ function PeerwayApp() {
     <Screen6_AllSet    key="s6" onNext={() => setInternalMode('done')} onBack={goBack}/>,
   ];
 
-  // Content to render inside the device frame
+  // Pick what to render inside the phone frame.
   let content;
   if (internalMode === 'loading') {
     content = <LoadingState/>;
@@ -178,6 +185,7 @@ function PeerwayApp() {
   );
 }
 
+// Small pill button used by the rail's prev/next/state controls.
 function RailBtn({ children, onClick, active }) {
   return (
     <button onClick={onClick} style={{
@@ -193,6 +201,8 @@ function RailBtn({ children, onClick, active }) {
   );
 }
 
+// Placeholder shown after the preview's onboarding ends — the real app
+// continues into MainAppShell instead.
 function DoneStub({ onRestart }) {
   return (
     <div style={{

@@ -1,11 +1,13 @@
-// Screen 3 — Savings reveal
+// Onboarding screen 3 — reveals the estimated annual savings range, a
+// comparison bar against the standard grid tariff, and a collapsible
+// breakdown of how the figure is calculated.
 function Screen3_Savings({ state, onNext, onBack }) {
   const [showCalc, setShowCalc] = React.useState(false);
   const [lo, hi] = [100, 300];
   const [loAnim, setLoAnim] = React.useState(0);
   const [hiAnim, setHiAnim] = React.useState(0);
 
-  // Count-up animation
+  // Animate the lo/hi figures from 0 up to their target with an ease-out curve.
   React.useEffect(() => {
     const start = performance.now();
     const dur = 900;
@@ -187,6 +189,8 @@ function Screen3_Savings({ state, onNext, onBack }) {
   );
 }
 
+// Older single-figure variant of the savings reveal. Kept for reference;
+// the current screen uses the inline range above instead.
 function HeroRow({ prefix, value, big }) {
   return (
     <div style={{

@@ -1,7 +1,7 @@
-// Screen 2 — Connection success
+// Onboarding screen 2 — celebrates the (mocked) smart-meter connection.
+// The CTA is held disabled for ~900ms so the success animation can land first.
 function Screen2_Connected({ onNext, onBack, provider = 'your energy provider' }) {
   const [ready, setReady] = React.useState(false);
-  // Checkmark lands at ~0.75s; enable CTA shortly after
   React.useEffect(() => {
     const t = setTimeout(() => setReady(true), 900);
     return () => clearTimeout(t);

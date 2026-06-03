@@ -1,4 +1,6 @@
-// Screen 6 — What happens next
+// Onboarding screen 6 — wraps up the flow with projected first-month
+// numbers and a "what happens next" timeline before handing the user
+// over to the main app.
 function Screen6_AllSet({ onNext, onBack }) {
   return (
     <PwScreen step={5} onBack={onBack}>

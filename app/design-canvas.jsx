@@ -1,7 +1,6 @@
-
-// DesignCanvas.jsx — Figma-ish design canvas wrapper
-// Warm gray grid bg + Sections + Artboards + PostIt notes.
-// No assets, no deps.
+// Dev-only Figma-style canvas wrapper. Provides a pan/zoom viewport
+// with sections, artboards, and post-it notes for laying screens out
+// side by side. Not used in the survey build itself.
 
 const DC = {
   bg: '#f0eee9',
@@ -14,19 +13,16 @@ const DC = {
   font: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
 };
 
-// ─────────────────────────────────────────────────────────────
-// Main canvas — transform-based pan/zoom viewport
+// Pan/zoom viewport that wraps the canvas children. Input mapping
+// follows Figma's conventions:
+//   * trackpad pinch  → zoom (ctrl+wheel, or Safari gesture* events)
+//   * trackpad scroll → pan
+//   * mouse wheel     → zoom (a notched wheel is detected and handled separately)
+//   * middle-drag (or primary-drag on empty canvas) → pan
 //
-// Input mapping (Figma-style):
-//   • trackpad pinch  → zoom   (ctrlKey wheel; Safari gesture* events)
-//   • trackpad scroll → pan    (two-finger)
-//   • mouse wheel     → zoom   (notched; distinguished from trackpad scroll)
-//   • middle-drag / primary-drag-on-bg → pan
-//
-// Transform state lives in a ref and is written straight to the DOM
-// (translate3d + will-change) so wheel ticks don't go through React —
-// keeps pans at 60fps on dense canvases.
-// ─────────────────────────────────────────────────────────────
+// The pan/zoom transform is held in a ref and written straight to the
+// DOM via translate3d so wheel events don't trigger React re-renders —
+// that's what keeps the canvas at 60fps even with lots of artboards.
 function DesignCanvas({ children, minScale = 0.1, maxScale = 8, style = {} }) {
   const vpRef = React.useRef(null);
   const worldRef = React.useRef(null);
@@ -48,44 +44,41 @@ function DesignCanvas({ children, minScale = 0.1, maxScale = 8, style = {} }) {
       const t = tf.current;
       const next = Math.min(maxScale, Math.max(minScale, t.scale * factor));
       const k = next / t.scale;
-      // keep the world point under the cursor fixed
+      // Keep the world point under the cursor fixed during the zoom.
       t.x = px - (px - t.x) * k;
       t.y = py - (py - t.y) * k;
       t.scale = next;
       apply();
     };
 
-    // Mouse-wheel vs trackpad-scroll heuristic. A physical wheel sends
-    // line-mode deltas (Firefox) or large integer pixel deltas with no X
-    // component (Chrome/Safari, typically multiples of 100/120). Trackpad
-    // two-finger scroll sends small/fractional pixel deltas, often with
-    // non-zero deltaX. ctrlKey is set by the browser for trackpad pinch.
+    // There's no clean browser API for "is this a real mouse wheel?", so
+    // we infer it: physical wheels send line-mode deltas (Firefox) or
+    // large integer pixel deltas with no X component (Chrome/Safari).
+    // Trackpads send small/fractional deltas, often with a non-zero
+    // deltaX. ctrlKey on a wheel event means a trackpad pinch.
     const isMouseWheel = (e) =>
       e.deltaMode !== 0 ||
       (e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 40);
 
     const onWheel = (e) => {
       e.preventDefault();
-      if (isGesturing) return; // Safari: gesture* owns the pinch — discard concurrent wheels
+      // Safari fires both gesture* and ctrlKey wheel events during a
+      // pinch; drop the wheel half so we don't apply zoom twice.
+      if (isGesturing) return;
       if (e.ctrlKey) {
-        // trackpad pinch (or explicit ctrl+wheel)
         zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
       } else if (isMouseWheel(e)) {
-        // notched mouse wheel — fixed-ratio step per click
         zoomAt(e.clientX, e.clientY, Math.exp(-Math.sign(e.deltaY) * 0.18));
       } else {
-        // trackpad two-finger scroll — pan
         tf.current.x -= e.deltaX;
         tf.current.y -= e.deltaY;
         apply();
       }
     };
 
-    // Safari sends native gesture* events for trackpad pinch with a smooth
-    // e.scale; preferring these over the ctrl+wheel fallback gives a much
-    // better feel there. No-ops on other browsers. Safari also fires
-    // ctrlKey wheel events during the same pinch — isGesturing makes
-    // onWheel drop those entirely so they neither zoom nor pan.
+    // Safari has dedicated gesture* events for trackpad pinches with a
+    // smooth e.scale. Using them when available feels noticeably better
+    // than the ctrl+wheel fallback. Other browsers ignore these listeners.
     let gsBase = 1;
     let isGesturing = false;
     const onGestureStart = (e) => { e.preventDefault(); isGesturing = true; gsBase = tf.current.scale; };
@@ -95,8 +88,8 @@ function DesignCanvas({ children, minScale = 0.1, maxScale = 8, style = {} }) {
     };
     const onGestureEnd = (e) => { e.preventDefault(); isGesturing = false; };
 
-    // Drag-pan: middle button anywhere, or primary button starting on the
-    // canvas background (not inside an artboard).
+    // Drag to pan: middle mouse button anywhere, or primary button if
+    // the drag started on the canvas background (not inside an artboard).
     let drag = null;
     const onPointerDown = (e) => {
       const onBg = e.target === vp || e.target === worldRef.current;
@@ -176,9 +169,7 @@ function DesignCanvas({ children, minScale = 0.1, maxScale = 8, style = {} }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Section — title + subtitle + h-stack of artboards (no wrap)
-// ─────────────────────────────────────────────────────────────
+// Horizontal section of artboards with a title and optional subtitle.
 function DCSection({ title, subtitle, children, gap = 48 }) {
   return (
     <div style={{ marginBottom: 80, position: 'relative' }}>
@@ -193,7 +184,7 @@ function DCSection({ title, subtitle, children, gap = 48 }) {
           }}>{subtitle}</div>
         )}
       </div>
-      {/* h-stack — clips offscreen, never wraps */}
+      {/* Horizontal stack: clips off-screen, never wraps. */}
       <div style={{
         display: 'flex', gap, padding: '0 60px',
         alignItems: 'flex-start', width: 'max-content',
@@ -204,9 +195,7 @@ function DCSection({ title, subtitle, children, gap = 48 }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Artboard — labeled card
-// ─────────────────────────────────────────────────────────────
+// One labelled rectangular artboard inside a section.
 function DCArtboard({ label, children, width, height, style = {} }) {
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -232,9 +221,7 @@ function DCArtboard({ label, children, width, height, style = {} }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Post-it — absolute-positioned sticky note
-// ─────────────────────────────────────────────────────────────
+// Absolute-positioned sticky note overlay (yellow paper, hand-written font).
 function DCPostIt({ children, top, left, right, bottom, rotate = -2, width = 180 }) {
   return (
     <div style={{

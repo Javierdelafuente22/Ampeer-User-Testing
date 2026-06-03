@@ -1,6 +1,11 @@
-// Reusable question UI: single-choice, Yes/Maybe/No, Comparison (with screenshots),
-// and an open text area.
+// The four question controls shared across all three stages:
+//   ChoiceQuestion           — list of radio-style options
+//   YesMaybeNoQuestion       — Yes / Maybe / No, optionally with a "Skip"
+//   ComparisonQuestion       — two side-by-side screenshots + 3 options
+//   ExplanatoryScreenshot    — single reference image with tap-to-zoom
+//   OpenTextQuestion         — free-text area
 
+// A vertical list of single-select options.
 function ChoiceQuestion({ options, value, onChange }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -53,6 +58,8 @@ const YMN_OPTIONS = [
   { value: 'no',    label: 'No' },
 ];
 
+// Three big buttons (Yes / Maybe / No). Pass `skipLabel` to add a dashed
+// "skip" button underneath for questions the participant may not be able to answer.
 function YesMaybeNoQuestion({ value, onChange, skipLabel }) {
   return (
     <>
@@ -121,6 +128,7 @@ const COMP_OPTIONS = [
   { value: 'enphase',        label: 'Enphase' },
 ];
 
+// One thumbnail card used by ComparisonQuestion. Clicking opens the Lightbox.
 function ScreenshotCard({ label, src, onClick }) {
   const [hov, setHov] = React.useState(false);
   return (
@@ -179,13 +187,15 @@ function ScreenshotCard({ label, src, onClick }) {
   );
 }
 
+// Side-by-side Ampeer / Enphase screenshots with three answer buttons
+// underneath. Either screenshot can be tapped to open in a full-screen lightbox.
 function ComparisonQuestion({ ampeerImage, enphaseImage, value, onChange }) {
-  // null | 'ampeer' | 'enphase' — which screenshot is expanded in the lightbox.
+  // null when neither screenshot is zoomed; otherwise 'ampeer' or 'enphase'.
   const [expanded, setExpanded] = React.useState(null);
 
   return (
     <div style={{ marginTop: 8 }}>
-      {/* Tap-to-zoom hint — plain muted subtitle */}
+      {/* Tap-to-zoom hint */}
       <p style={{
         margin: '0 0 14px',
         fontSize: 14, lineHeight: 1.5,
@@ -243,20 +253,21 @@ function ComparisonQuestion({ ampeerImage, enphaseImage, value, onChange }) {
   );
 }
 
-// Fullscreen image overlay for the comparison screenshots.
-// Tap-outside / ESC / close-button all dismiss it.
+// Full-screen zoomed view of a screenshot. Dismissed by tap-outside, the
+// close button, or the Escape key.
 //
-// Rendered via a portal into document.body so it escapes all parent scroll
-// containers (.pw-screen, IOSDevice's flex:1 overflow:auto, etc). Without
-// the portal, wheel/scroll events from inside the lightbox would bubble up
-// and scroll those ancestors, which makes the close button appear to drift.
+// Rendered through a portal into document.body so it sits above the iOS
+// device frame and the survey's scroll containers. Without the portal,
+// wheel/scroll events would leak into ancestors and make the close button
+// appear to drift as the user scrolled.
 function Lightbox({ src, label, onClose }) {
   React.useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
 
-    // Belt-and-suspenders body lock (no-op on this app since body is already
-    // overflow: hidden, but keeps the lock intact for any future change).
+    // Lock body scroll while the lightbox is open. Today this is a no-op
+    // (body is already overflow: hidden) but it keeps the guarantee if
+    // that ever changes.
     const prevBody = document.body.style.overflow;
     const prevHtml = document.documentElement.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -341,9 +352,8 @@ function Lightbox({ src, label, onClose }) {
   return ReactDOM.createPortal(content, document.body);
 }
 
-// Single centred reference screenshot — shown below a YMN question to remind
-// the participant where the feature lives in the app. ~60% of the canvas wide,
-// no footer label, tap-to-zoom via the same Lightbox as ComparisonQuestion.
+// One reference screenshot shown under a YMN question, half the canvas wide,
+// to remind the participant where the feature lives. Tap to zoom.
 function ExplanatoryScreenshot({ src, alt = 'Reference screenshot' }) {
   const [expanded, setExpanded] = React.useState(false);
   const [hov, setHov] = React.useState(false);
@@ -400,6 +410,7 @@ function ExplanatoryScreenshot({ src, alt = 'Reference screenshot' }) {
   );
 }
 
+// Plain multi-line free-text input.
 function OpenTextQuestion({ value, onChange, placeholder = 'Optional — anything else on your mind?' }) {
   return (
     <textarea

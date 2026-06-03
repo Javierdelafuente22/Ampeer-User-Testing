@@ -1,6 +1,8 @@
-// Shared survey primitives — reuse Ampeer's PwButton, PwScreen, PwProgress, etc.,
-// but provide a couple of survey-specific helpers (QuestionHeader, EndStudyButton).
+// Helpers used only by the survey screens. Everything visual relies on the
+// Ampeer primitives (PwButton, PwScreen, etc.), but a few survey-specific
+// pieces live here: the question header and the floating "End study" pill.
 
+// "Question N of M" eyebrow plus the prompt and optional subtitle.
 function QuestionHeader({ index, total, prompt, subtitle, hideEyebrow }) {
   return (
     <div style={{ marginBottom: 22 }}>
@@ -30,11 +32,12 @@ function QuestionHeader({ index, total, prompt, subtitle, hideEyebrow }) {
   );
 }
 
-// Floating "End study" pill — sits above the iOS chrome at top-right.
-// On desktop it must clear the IOSDevice's fake status bar (~50px),
-// so we use top: 60. On mobile (full-screen viewport, no fake frame),
-// the same value puts it on top of TabHeader items (bell, weather pill,
-// live counter). On mobile we sit just below the real OS safe area.
+// Floating pill at the top-right of MainAppShell. Shows progress while the
+// participant explores the app, then becomes the "End study" action once
+// all tabs have been visited.
+//
+// On desktop it sits below the fake iOS status bar (~50px); on mobile it
+// drops below the real OS safe-area inset instead.
 function EndStudyButton({ enabled, visitedCount, totalCount = 5, onClick, isMobile }) {
   const [hov, setHov] = React.useState(false);
   const top = isMobile ? 'calc(env(safe-area-inset-top, 0px) + 6px)' : 60;

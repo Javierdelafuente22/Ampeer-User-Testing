@@ -1,11 +1,15 @@
-// Community tab — animated map of anonymized trading peers
+// The Community tab. Shows an animated, anonymised map of the
+// participant's local trading peers plus collective impact stats,
+// a breakdown of who they trade with, and an invite-a-neighbour CTA.
 function CommunityTab({ highlight, onClearHighlight, weatherState }) {
   const activeKind = weatherState?.activeKind || 'sunny';
   const [tick, setTick] = React.useState(0);
   const [glowing, setGlowing] = React.useState(false);
-  const [inviteMethod, setInviteMethod] = React.useState(null); // null | 'share' | 'clipboard'
-  const [popup, setPopup] = React.useState(null); // null | { title, insight }
+  const [inviteMethod, setInviteMethod] = React.useState(null);
+  const [popup, setPopup] = React.useState(null);
 
+  // Uses the native Web Share dialog when available; falls back to copying
+  // the link to the clipboard. Either way we show a confirmation panel.
   const handleInvite = async () => {
     const url = 'https://www.ampeerenergy.com';
     try {
@@ -21,10 +25,10 @@ function CommunityTab({ highlight, onClearHighlight, weatherState }) {
         setInviteMethod('clipboard');
       }
     } catch (e) {
-      // user cancelled — do nothing
     }
   };
 
+  // Animation clock — same pattern as HouseTab; drives the flow particles.
   React.useEffect(() => {
     let raf;
     const start = performance.now();
@@ -36,9 +40,12 @@ function CommunityTab({ highlight, onClearHighlight, weatherState }) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // When the user arrived from the Home banner, briefly glow the map so
+  // they know they've landed in the right place. Clear the parent's flag
+  // immediately so coming back to this tab later doesn't re-trigger it.
   React.useEffect(() => {
     if (!highlight) return;
-    onClearHighlight && onClearHighlight(); // clear parent flag immediately so re-visits don't re-trigger
+    onClearHighlight && onClearHighlight();
     setGlowing(true);
     const t = setTimeout(() => setGlowing(false), 4000);
     return () => clearTimeout(t);
@@ -287,6 +294,7 @@ function CommunityTab({ highlight, onClearHighlight, weatherState }) {
 
 }
 
+// One coloured-square + label row in the map's legend.
 function LegendItem({ color, label }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -296,6 +304,8 @@ function LegendItem({ color, label }) {
 
 }
 
+// One of the three "this month you've traded with" tiles. `type` picks
+// the matching icon (home, shop, or school).
 function BreakdownTile({ n, label, type }) {
   const icon = {
     home: (
@@ -342,6 +352,7 @@ function BreakdownTile({ n, label, type }) {
 
 }
 
+// Coloured-square + label used inside the community composition bar.
 function Swatch({ color, label }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
@@ -351,8 +362,8 @@ function Swatch({ color, label }) {
 
 }
 
-// Animated map with anonymized nodes. 10 peers + grid node + you.
-// Positions are stable, flows are randomized per tick to feel alive.
+// Fixed positions for the ten anonymised peers on the map. The grid node
+// and the user's own node have their own constants below.
 const PEERS = [
 { x: 72, y: 92, type: 'shop' },
 { x: 130, y: 70, type: 'home' },
@@ -368,8 +379,8 @@ const PEERS = [
 const GRID_NODE = { x: 220, y: 185 };
 const YOU_NODE = { x: 140, y: 160 };
 
-// Per-node insights, shown in a popup when a node is tapped. Indices align with PEERS;
-// each entry must match the type at the same index so e.g. shops get shop-flavoured copy.
+// One plain-English insight per peer. Indices line up with PEERS, so peer
+// 3 (a home) gets index 3's copy. Keep the wording matched to the type.
 const PEER_INSIGHTS = [
   'Local shops often need steady power during the day.',
   'Homes nearby usually use extra solar energy in the evening.',
@@ -385,6 +396,8 @@ const PEER_INSIGHTS = [
 const TYPE_TITLE = { home: 'Home', shop: 'Shop', school: 'School' };
 const GRID_INSIGHT = 'The grid balances supply and demand when local trading is not enough.';
 
+// SVG canvas that draws the soft "neighbourhood" background, all the
+// nodes (you, grid, peers), and the animated flow lines between them.
 function CommunityMap({ tick, kind, onTap }) {
   const youInsight = kind === 'night'
     ? "You're drawing from your battery overnight."
@@ -393,13 +406,13 @@ function CommunityMap({ tick, kind, onTap }) {
       : kind === 'cloudy'
         ? "You're sharing a small surplus when your panels can spare it."
         : "You're exporting surplus solar to nearby neighbours.";
-  // Active flows depend on the weather kind (driven by Home tab override).
-  // Sunny: vibrant peer-to-peer + lots of YOU → trades.
-  // Cloudy: mix of YOU → and GRID → flows; modest activity.
-  // Rainy: grid-dominated, no flows out from YOU (you're using your battery).
+  // Which flows are drawn depends on the active weather kind:
+  //   sunny  — vibrant peer-to-peer plus several YOU → peer trades
+  //   cloudy — fewer YOU → flows, the grid steps in for the rest
+  //   rainy  — grid-dominated, you're on battery and don't share anything
+  //   night  — even quieter; lighter blue particles for visibility
   const activeFlows = React.useMemo(() => {
     if (kind === 'night') {
-      // Quieter than rainy — fewer flows, lighter blue against dark.
       return [
         { from: GRID_NODE, to: PEERS[1], color: '#7a9cc2' },
         { from: GRID_NODE, to: PEERS[5], color: '#7a9cc2' },
@@ -418,19 +431,18 @@ function CommunityMap({ tick, kind, onTap }) {
       return [
         { from: YOU_NODE,  to: PEERS[1], color: '#00A862' },
         { from: YOU_NODE,  to: PEERS[6], color: '#00A862' },
-        { from: GRID_NODE, to: PEERS[4], color: '#8aa69b' }, // grid → school (downwards)
-        { from: GRID_NODE, to: PEERS[2], color: '#8aa69b' }, // grid → north shop (upwards)
-        { from: PEERS[3],  to: PEERS[5], color: '#6FCBA0' }, // peer-to-peer in light green
+        { from: GRID_NODE, to: PEERS[4], color: '#8aa69b' },
+        { from: GRID_NODE, to: PEERS[2], color: '#8aa69b' },
+        { from: PEERS[3],  to: PEERS[5], color: '#6FCBA0' },
       ];
     }
     return [
       { from: YOU_NODE,  to: PEERS[1], color: '#00C06F' },
       { from: YOU_NODE,  to: PEERS[6], color: '#00A862' },
       { from: YOU_NODE,  to: PEERS[8], color: '#00C06F' },
-      // Adjacent peer-to-peer trades (close neighbours, kept clean)
-      { from: PEERS[0],  to: PEERS[1], color: '#6FCBA0' }, // NW pair
-      { from: PEERS[3],  to: PEERS[4], color: '#6FCBA0' }, // NE pair (home → school)
-      { from: PEERS[5],  to: PEERS[6], color: '#6FCBA0' }, // SE pair
+      { from: PEERS[0],  to: PEERS[1], color: '#6FCBA0' },
+      { from: PEERS[3],  to: PEERS[4], color: '#6FCBA0' },
+      { from: PEERS[5],  to: PEERS[6], color: '#6FCBA0' },
     ];
   }, [kind]);
 
@@ -502,6 +514,8 @@ function CommunityMap({ tick, kind, onTap }) {
 
 }
 
+// One peer marker on the map: dark circle, soft green pulse, and the
+// SVG icon for the peer's type (home, shop, school).
 function PeerNode({ x, y, type, pulse, onTap }) {
   const icon = {
     home: (
@@ -533,6 +547,8 @@ function PeerNode({ x, y, type, pulse, onTap }) {
 
 }
 
+// Animated curved line with three travelling dots between two nodes.
+// Used for every trade arrow on the community map.
 function AnimatedFlow({ from, to, color, tick, delay = 0 }) {
   const ref = React.useRef();
   const [len, setLen] = React.useState(0);
@@ -540,7 +556,8 @@ function AnimatedFlow({ from, to, color, tick, delay = 0 }) {
     if (ref.current) setLen(ref.current.getTotalLength());
   }, [from, to]);
 
-  // Curved path for more organic feel
+  // Bend the line perpendicular to the straight A→B vector so connections
+  // feel more like organic streets than ruled lines.
   const mx = (from.x + to.x) / 2;
   const my = (from.y + to.y) / 2;
   const dx = to.x - from.x;
@@ -574,6 +591,8 @@ function AnimatedFlow({ from, to, color, tick, delay = 0 }) {
 
 }
 
+// Small dialog that appears when a node is tapped, with the node's title
+// and a one-line plain-English insight. Tap-outside or × closes it.
 function NodeInsightPopup({ title, insight, onClose }) {
   return (
     <div onClick={onClose} style={{

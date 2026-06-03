@@ -1,4 +1,6 @@
-// Profile tab — account management
+// The Profile tab — account, trading status, notifications, support,
+// and a danger zone for deleting the account. Tapping a support row
+// opens its own detail panel without leaving the tab.
 function ProfileTab({ fullName = 'Sarah Chen', initials = 'SC' }) {
   const [paused, setPaused] = React.useState(false);
   const [digest, setDigest] = React.useState(true);
@@ -9,6 +11,8 @@ function ProfileTab({ fullName = 'Sarah Chen', initials = 'SC' }) {
   const [supportSent, setSupportSent] = React.useState(false);
   const [csvOpen, setCsvOpen] = React.useState(false);
 
+  // Builds a CSV string from the mock trading history and triggers a
+  // browser download. The data here is for demo purposes only.
   const downloadCsv = () => {
     const header = 'Date,Time,Type,kWh,Rate (p/kWh),Counterparty,Grid Equiv Rate (p/kWh),Saving (£),CO2 Saved (kg)';
     const rows = [
@@ -157,7 +161,7 @@ function ProfileTab({ fullName = 'Sarah Chen', initials = 'SC' }) {
 
   if (csvOpen) return <CsvViewer onBack={() => setCsvOpen(false)} onDownload={downloadCsv} />;
 
-  // Detail panel view
+  // When a support row is opened it takes over the whole tab until Back is tapped.
   if (openPanel && panels[openPanel]) {
     const panel = panels[openPanel];
     return (
@@ -382,6 +386,7 @@ function ProfileTab({ fullName = 'Sarah Chen', initials = 'SC' }) {
   );
 }
 
+// Small uppercase heading above each grouped block of rows.
 function SectionLabel({ children, danger }) {
   return (
     <div className="t-label" style={{
@@ -395,6 +400,7 @@ function SectionLabel({ children, danger }) {
   );
 }
 
+// Read-only row in the "Your details" card (icon + label + value).
 function ProfileRow({ icon, label, value, last }) {
   return (
     <div style={{
@@ -422,6 +428,7 @@ function ProfileRow({ icon, label, value, last }) {
   );
 }
 
+// Smart meter / tariff row inside the Trading card, with a small status dot.
 function ConnectionRow({ title, subtitle, status, last }) {
   const dot = status === 'connected' ? 'var(--lime-500)' : 'var(--ink-400)';
   return (
@@ -445,6 +452,7 @@ function ConnectionRow({ title, subtitle, status, last }) {
   );
 }
 
+// Notification row with an iOS-style toggle on the right.
 function ToggleRow({ icon, title, detail, on, onChange, last }) {
   return (
     <div style={{
@@ -473,6 +481,7 @@ function ToggleRow({ icon, title, detail, on, onChange, last }) {
   );
 }
 
+// Tappable navigation row used by the Support section.
 function LinkRow({ icon, title, detail, last, onClick }) {
   return (
     <button onClick={onClick} style={{
@@ -504,6 +513,7 @@ function LinkRow({ icon, title, detail, last, onClick }) {
   );
 }
 
+// Plain iOS-style on/off toggle. Used by both ToggleRow and the trading-status block.
 function Toggle({ on, onChange }) {
   return (
     <button onClick={() => onChange(!on)} style={{
@@ -523,6 +533,8 @@ function Toggle({ on, onChange }) {
   );
 }
 
+// Full-screen preview of the trading-history CSV before the user
+// downloads it. The download button uses the parent's onDownload handler.
 function CsvViewer({ onBack, onDownload }) {
   const isMobile =
     window.matchMedia('(max-width: 600px) and (pointer: coarse)').matches ||
@@ -607,7 +619,7 @@ function CsvViewer({ onBack, onDownload }) {
               <tr key={i} style={{ borderBottom: '1px solid var(--cream-200)', background: i % 2 === 0 ? 'var(--surface)' : 'var(--cream-50)' }}>
                 {row.map((cell, j) => (
                   <td key={j} style={{
-                    padding: '8px 10px', color: 'var(--ink-900)',
+                    padding: '8px 10px',
                     whiteSpace: 'nowrap',
                     color: cell === 'Import' ? 'var(--ink-500)' : cell === 'Export' ? 'var(--lime-600)' : 'var(--ink-900)',
                   }}>{cell}</td>

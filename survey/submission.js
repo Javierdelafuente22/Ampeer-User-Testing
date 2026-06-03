@@ -1,14 +1,15 @@
-// Supabase submission. One row per participant, one column per question.
-// See SURVEY.md for the setup walkthrough (project + table + RLS).
+// Writes one row per participant to the Supabase `responses` table.
+// Setup steps (project, table, Row Level Security policy) are in SURVEY.md.
 //
-// The publishable key is designed to be public — security is enforced by the
-// Row Level Security policy on the `responses` table.
+// The publishable key below is the public anon key — safe to commit. Security
+// is enforced server-side by the RLS policy, which only permits inserts.
 
 const SUPABASE_URL             = 'https://jdmhxmjjqighphplybdc.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_NIoQxGgvIcfd8yFLV2-ORQ_YZuqgMyC';
 
-// Map the in-memory responses object (camelCase) to the database row
-// (snake_case columns). Adding / renaming a question? Update here + the SQL.
+// Converts the in-memory responses object (camelCase) into the row shape
+// expected by Postgres (snake_case columns). Adding or renaming a question
+// means updating this function as well as the SQL schema in SURVEY.md.
 function mapResponsesToRow(r) {
   return {
     // Meta
@@ -53,8 +54,11 @@ function mapResponsesToRow(r) {
   };
 }
 
+// POSTs the responses to Supabase. Returns { ok: true } on success or
+// { ok: false, error } on failure so the caller can show the fallback screen.
+// (The function name still says "Sheets" because earlier versions of the
+// study wrote to Google Sheets; it's kept for backwards compatibility.)
 async function submitSurveyToSheets(responses) {
-  // (Name kept for backwards compatibility with PeerwayRoot.)
   if (SUPABASE_URL.includes('REPLACE_WITH_YOUR_PROJECT_REF')
       || SUPABASE_PUBLISHABLE_KEY.includes('REPLACE_WITH_YOUR_PUBLISHABLE_KEY')) {
     return {

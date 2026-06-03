@@ -1,7 +1,9 @@
-﻿const nowBST = () => new Intl.DateTimeFormat('en-GB', {
+﻿// Current time formatted as "9:42am" in UK timezone, used to timestamp messages.
+const nowBST = () => new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/London', hour: 'numeric', minute: '2-digit', hour12: true,
 }).format(new Date()).replace(' ', '').toLowerCase();
 
+// Dark pill that takes the user from the chat to the smart-mode setup screen.
 function SmartModeButton({ onClick }) {
   const [hov, setHov] = React.useState(false);
   return (
@@ -28,10 +30,13 @@ function SmartModeButton({ onClick }) {
   );
 }
 
-// Assistant tab — chat with AI trading agent. Mission-check pattern.
+// Chat-style screen where the user tells the trading agent about their week
+// and the agent comes back with a numbered plan to confirm. Falls into the
+// dedicated "smart mode" screen if the user wants to connect their calendar
+// or location for automatic planning.
 function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
-  // Address the participant by name only when they actually gave one in Stage 1.
-  // Otherwise drop the name entirely (don't pretend the user is "Sarah").
+  // Only address the user by name if they actually entered one in Stage 1.
+  // Falling back to "Sarah" would pretend to know the participant.
   const addressee = userProvidedName ? ` ${firstName}` : '';
   const [messages, setMessages] = React.useState(() => {
     const t = nowBST();
@@ -49,7 +54,7 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
     ];
   });
   const [input, setInput] = React.useState('');
-  const [view, setView] = React.useState('chat'); // 'chat' | 'intelligence'
+  const [view, setView] = React.useState('chat');
   const [calEnabled, setCalEnabled] = React.useState(false);
   const [locationEnabled, setLocationEnabled] = React.useState(false);
   const [listening, setListening] = React.useState(false);
@@ -57,10 +62,12 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
   const scrollRef = React.useRef();
   const inputRef = React.useRef();
 
-  // Web Speech API — speech-to-text. Tap mic, speak, transcript fills the input.
+  // Speech-to-text via the browser's Web Speech API. The mic button is only
+  // shown when the API is available; everywhere else falls back to typing.
   const speechSupported = typeof window !== 'undefined' &&
     (window.SpeechRecognition || window.webkitSpeechRecognition);
 
+  // Begin a microphone session and pipe the live transcript into the input box.
   const startListening = () => {
     if (!speechSupported) {
       alert("Voice input isn't supported in this browser. Try Safari or Chrome.");
@@ -83,9 +90,10 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       setInput((finalText + interim).trim());
     };
     rec.onerror = () => setListening(false);
-    // Don't auto-stop on silence — user controls via tap
+    // Browsers stop the session after a short silence, but the user expects
+    // the mic to stay open until they tap to stop. _keepAlive lets us restart
+    // it transparently every time it auto-ends.
     rec.onend = () => {
-      // Browser may force-stop after silence; restart if still in listening mode
       if (recognitionRef.current && recognitionRef.current._keepAlive) {
         try { rec.start(); } catch (e) {}
       }
@@ -97,6 +105,7 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
     rec.start();
   };
 
+  // End the current microphone session and stop the auto-restart loop.
   const stopListening = () => {
     if (recognitionRef.current) {
       recognitionRef.current._keepAlive = false;
@@ -105,13 +114,15 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
     setListening(false);
   };
 
+  // Keep the latest message in view as new ones arrive.
   React.useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Resize textarea when input changes from any source (typed, voice, programmatic)
+  // Auto-size the textarea whenever the input changes, whether the change
+  // came from typing, dictation, or the prompt chips.
   React.useEffect(() => {
     if (!inputRef.current) return;
     inputRef.current.style.height = 'auto';
@@ -124,24 +135,28 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
   "Charge my EV by 7am"];
 
 
+  // Appends the user's message, then replies with the agent's response after
+  // a short delay so the chat feels conversational rather than instant.
   const runPrompt = (text) => {
     setMessages((m) => [...m, { role: 'user', text, ts: 'now' }]);
     setInput('');
     if (inputRef.current) { inputRef.current.style.height = '36px'; }
 
-    // Simulate AI response after a beat
     setTimeout(() => {
       const response = aiRespond(text);
       setMessages((m) => [...m, response]);
     }, 700);
   };
 
+  // Matches the user's message against a few intent patterns (greetings,
+  // travel, work, EV charging, explainers) and returns the corresponding
+  // canned response or plan card. Anything off-topic gets a polite redirect.
   const aiRespond = (text) => {
     const t = text.toLowerCase();
     const greetingOnly = t.trim().replace(/[.!?]+$/, '');
 
-    // 0) GREETINGS — "hi", "hellooo", "heyyy", etc. Trailing letters allowed
-    // on hi / hello / hey / yo / hola / hiya so casual variants still match.
+    // Greetings. Trailing repeated letters are allowed so casual forms
+    // like "hiiii" or "heyyy" still match.
     if (/^(hello+|hi+ya+|hi+|hey+|howdy+|hola+|sup+|yo+|greetings+|gm|good\s+(morning|afternoon|evening|day)|hi+\s+there|hello+\s+there|hey+\s+there|what'?s\s+up)$/.test(greetingOnly)) {
       return {
         role: 'ai', type: 'message', ts: 'now',
@@ -149,7 +164,7 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       };
     }
 
-    // 1) HOLIDAY / TRAVEL / AWAY
+    // Travel / time away from home.
     if (/\b(holiday|holidays|vacation|away|trip|travel|travelling|traveling|out of town|paris|spain|abroad|weekend away|going away|not home|not around|leaving town|leaving home|be away|be out|gone for|gone all|few days off|days off|week off|time off|flying|flight|airport|staying at|visiting|won't be home|won't be in|not in today|not in tomorrow|not back|back on|return on|gone until|empty house|house.?sit|nobody home|no one home|mum'?s|mom'?s|parents|friend'?s|bnb|airbnb|hotel|hostel|camping|festival|wedding|break|getaway|ski|beach|city break)\b/.test(t)) {
       return {
         role: 'ai', type: 'plan', ts: 'now',
@@ -164,7 +179,8 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       };
     }
 
-    // 2) WORK SCHEDULE — WFH or office days
+    // Work pattern — separates "at the office" from "home all day" so the
+    // returned plan matches whether the house will be occupied.
     if (/\b(work from home|working from home|wfh|home office|home all day|in the office|at the office|going to work|commute|commuting|workday|work schedule|office today|office tomorrow|in office|heading to work|heading in|going in|at work|working today|working tomorrow|9 to 5|nine to five|hybrid|remote|on site|on-?site|staying home|home today|home tomorrow|day off|not working|working late|early start|late start|back from work|finishing early|leaving work|leave work|start at|finish at|shifts?|night shift|morning shift)\b/.test(t)) {
       const office = /\b(office|going to work|commute|commuting|in office|heading to work|heading in|going in|at work|on site|on-?site|9 to 5|nine to five)\b/.test(t);
       if (office) {
@@ -192,9 +208,9 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       };
     }
 
-    // 3) EV CHARGING
+    // EV charging.
     if (/\b(ev|electric vehicle|car|tesla|model [3sxy]|charge|charging|charger|plug in|plug it in|plugged in|top up|top it up|juice|range|miles|battery.?low|need.?charge|full.?charge|charge.?full|ready.?by|ready.?for|drive|driving|road trip|long drive|motorway|need the car|using the car|taking the car)\b/.test(t)) {
-      // Try to extract a target time like "by 7am" or "by 8:30"
+      // Pull out a target time if the user said one ("by 7am", "by 8:30").
       const timeMatch = t.match(/by\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
       const targetTime = timeMatch ? timeMatch[0].replace('by ', '') : '7am';
       return {
@@ -209,7 +225,7 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       };
     }
 
-    // 4) "What does the app do / how does Ampeer work" — friendly explainer
+    // "What does the app do? / How does Ampeer work?" — friendly explainer.
     if (/\b(what (does|is) (the |this )?(app|ampeer|it)( do)?|what'?s (the |this )?(app|ampeer|it)( do)?|what (is|'?s) (it|this|the app) for|how (does|do) (it|this|the app|ampeer) work|how (does|do) ampeer work|tell me (about|more about) (the |this )?(app|ampeer|it)|explain (the |this |it )?(app|ampeer)?|describe (the |this )?(app|ampeer|it)|how does peer.to.peer|how does p2p)\b/.test(t)) {
       return {
         role: 'ai', type: 'message', ts: 'now',
@@ -218,7 +234,7 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       };
     }
 
-    // 5) "Why is this beneficial / what's in it for me / why use it" — value pitch
+    // "Why is this useful? / What's in it for me?" — value pitch.
     if (/\b(why (is|are|would|should) (this|it|i|ampeer|the app|using ampeer)|why use (this|the app|ampeer)|how (do|does|will) (it|this|ampeer) (help|benefit) (me|us|society|the planet|the environment|the community)|how (do|will) i benefit|what'?s in it for me|what'?s the benefit|benefits? (of|for|to) (using )?(this|it|the app|ampeer|me)|is (this|it|ampeer) worth it|good for (me|society|the planet|the environment|the community)|help (the )?(environment|planet|community)|why does it benefit)\b/.test(t)) {
       return {
         role: 'ai', type: 'message', ts: 'now',
@@ -230,7 +246,7 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       };
     }
 
-    // 6) ENERGY-RELATED but outside the use cases — gentle redirect
+    // Energy-related but not one of the three handled use cases — redirect.
     if (/\b(energy|electricity|power|solar|battery|grid|tariff|surplus|kwh|kw|sell|buy|trade|trading|peer|community|bill|saving|savings|price|cheap|peak|off-?peak)\b/.test(t)) {
       return {
         role: 'ai', type: 'message', ts: 'now',
@@ -238,13 +254,15 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
       };
     }
 
-    // 7) NON-ENERGY — politely decline
+    // Everything else — politely decline.
     return {
       role: 'ai', type: 'message', ts: 'now',
       text: "I can only help with energy-related tasks — like managing your solar, planning around holidays or work, or scheduling EV charging. Ask me about any of those!"
     };
   };
 
+  // User tapped "Yes, do it" (ok=true) or "Not yet" on a plan card. Either way
+  // we remove the buttons and append the agent's follow-up message.
   const handleConfirm = (idx, ok) => {
     setMessages((m) => {
       const next = [...m];
@@ -266,6 +284,8 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
     });
   };
 
+  // Called when the user finishes the smart-mode setup; returns to the chat
+  // and posts a confirmation message reflecting which permissions they granted.
   const handleEnable = ({ cal, location }) => {
     const text = cal && location
       ? "Smart mode on. I've connected your calendar and location — I'll plan your trading around your schedule and fine-tune solar forecasts with local weather. No input needed from you."
@@ -398,6 +418,7 @@ function AssistantTab({ firstName = 'Sarah', userProvidedName = false }) {
 
 }
 
+// Suggested-prompt pill shown above the input. Tapping it sends the prompt.
 function PromptChip({ label, onClick }) {
   const [hov, setHov] = React.useState(false);
   return (
@@ -417,6 +438,8 @@ function PromptChip({ label, onClick }) {
   );
 }
 
+// Renders one chat message. Picks the right layout based on the message type:
+// user bubble, plain AI message, plan card with confirm buttons, or smart-mode promo.
 function ChatBubble({ msg, idx, onConfirm, onSmartMode }) {
   if (msg.role === 'user') {
     return (
@@ -566,7 +589,8 @@ function ChatBubble({ msg, idx, onConfirm, onSmartMode }) {
 
 }
 
-// Dedicated explainer screen — NOT a modal.
+// Full-screen privacy-and-permissions setup for "smart mode". Lets the user
+// toggle calendar and location access, with a clear "what we won't do" list.
 function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, location, onLocationChange }) {
   const anyOn = cal || location;
 
@@ -685,6 +709,7 @@ function IntelligenceScreen({ onBack, onEnable, cal, onCalChange, location, onLo
 
 }
 
+// One labelled iOS-style toggle row inside the smart-mode setup screen.
 function IntelToggle({ title, detail, on, onChange }) {
   return (
     <button onClick={() => onChange(!on)} style={{

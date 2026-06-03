@@ -1,4 +1,5 @@
-// Print-only shell — renders all 5 tabs as separate pages for PDF export.
+// Print-only layout that lays the cover page and each of the five tabs
+// out on its own A4-style page. Used when exporting the app as a PDF.
 function PeerwayPrintShell() {
   const tabs = [
     { id: 'home',      label: 'Home',      sub: 'Live energy flow',          render: () => <HouseTab/> },

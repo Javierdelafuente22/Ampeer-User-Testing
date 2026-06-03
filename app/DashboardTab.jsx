@@ -1,6 +1,8 @@
-// Dashboard — default landing tab. "Did I save money?"
+// The Dashboard tab — the app's default landing screen. Answers the
+// question "did I save money this week / month / year?" with a hero
+// figure, supporting metrics, and a feed of moments from the period.
 function DashboardTab({ onNavigate }) {
-  const [window, setWindow] = React.useState('week'); // 'week' | 'month' | 'year'
+  const [window, setWindow] = React.useState('week');
   const [trustOpen, setTrustOpen] = React.useState(false);
   const [hovInsight, setHovInsight] = React.useState(false);
   const [pdfOpen, setPdfOpen] = React.useState(false);
@@ -11,7 +13,8 @@ function DashboardTab({ onNavigate }) {
     year:  { saved: 284.60, savedTrend: 'On track for £440', co2: 540.1, kwh: 1420, insight: "You're top 3 in your community. Chat to your assistant to climb the leaderboard" },
   }[window];
 
-  // Animated count-up for hero £ figure
+  // Smoothly count the hero "£ saved" figure from 0 to its target each
+  // time the user switches between week / month / year.
   const [savedAnim, setSavedAnim] = React.useState(0);
   React.useEffect(() => {
     setSavedAnim(0);
@@ -30,6 +33,8 @@ function DashboardTab({ onNavigate }) {
   const scrollRef = React.useRef();
   const momentsRef = React.useRef();
   const trustRef = React.useRef();
+  // Tap the bell in the header to scroll the moments feed into view,
+  // accounting for the sticky TabHeader's height.
   const scrollToMoments = () => {
     if (scrollRef.current && momentsRef.current) {
       const stickyHeader = scrollRef.current.querySelector('[style*="sticky"]');
@@ -41,9 +46,11 @@ function DashboardTab({ onNavigate }) {
     }
   };
 
+  // When the user expands the "you're never worse off" panel, scroll the
+  // page so the panel fully shows. We wait one frame so the panel has
+  // actually rendered before we measure scrollHeight.
   React.useEffect(() => {
     if (!trustOpen || !scrollRef.current) return;
-    // Wait one frame for the expanded panel to render, then scroll to bottom
     requestAnimationFrame(() => {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     });
@@ -268,6 +275,7 @@ function DashboardTab({ onNavigate }) {
   );
 }
 
+// One of the small "CO₂ saved" / "kWh traded" tiles under the hero figure.
 function MetricCard({ icon, label, value, unit }) {
   return (
     <div style={{
@@ -294,6 +302,8 @@ function MetricCard({ icon, label, value, unit }) {
   );
 }
 
+// One row in the moments feed. Renders as a button when an onClick is
+// supplied (so tap targets stay accessible), otherwise as a plain div.
 function InsightCard({ day, icon, title, detail, accent, onClick }) {
   const Tag = onClick ? 'button' : 'div';
   return (
@@ -349,6 +359,10 @@ function InsightCard({ day, icon, title, detail, accent, onClick }) {
   );
 }
 
+// Full-screen PDF reader for the weekly report. Renders each page to a
+// canvas via pdf.js (loaded from a CDN in index.html). The download
+// button uses the native share sheet on mobile and a plain download
+// link on desktop.
 function PdfViewer({ onBack }) {
   const isMobile =
     window.matchMedia('(max-width: 600px) and (pointer: coarse)').matches ||
@@ -400,7 +414,8 @@ function PdfViewer({ onBack }) {
           await navigator.share({ files: [file], title: 'Ampeer Weekly Report' });
           return;
         }
-      } catch (e) { /* cancelled or unsupported — fall through */ }
+      } catch (e) {
+      }
     }
     const a = document.createElement('a');
     a.href = 'app/ampeer_weekly_report.pdf';

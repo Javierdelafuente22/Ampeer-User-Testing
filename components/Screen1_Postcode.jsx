@@ -1,11 +1,13 @@
-// Screen 1 — Welcome + pre-filled postcode confirmation
+// Onboarding screen 1 — welcomes the user, confirms the pre-filled
+// postcode that was passed across from Octopus, and offers an optional
+// community ID field for users joining a known group.
 function Screen1_Postcode({ state, setState, onNext, firstName = 'Sarah', userProvidedName = false }) {
   const [postcode] = React.useState(state.postcode || 'SW6 3JD');
   const [communityOpen, setCommunityOpen] = React.useState(!!state.communityId);
   const [communityId, setCommunityId] = React.useState(state.communityId || '');
   const [peerInfoOpen, setPeerInfoOpen] = React.useState(false);
 
-  // Mock resolved data — always available since postcode is pre-filled
+  // Mocked lookup — in production this would resolve from the postcode.
   const areaData = { area: 'London', neighbors: 47 };
 
   const handleNext = () => {
@@ -121,8 +123,6 @@ function Screen1_Postcode({ state, setState, onNext, firstName = 'Sarah', userPr
           margin: '14px 4px 0', fontSize: 12, lineHeight: 1.5,
           color: 'var(--ink-400)', display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          {/*<IconLock size={12}/>
-          We use read-only access via your approved provider.*/}
         </p>
       </div>
     </PwScreen>

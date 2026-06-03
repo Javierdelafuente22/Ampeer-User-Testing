@@ -1,6 +1,6 @@
-// Stage 1 — split across two pages so each step feels uncluttered.
+// Stage 1 — profile questions, split across two pages.
 //   Page 1: optional first name + optional age range
-//   Page 2: renewable-energy knowledge level
+//   Page 2: experience managing home energy (required)
 
 const STAGE1_AGE_OPTIONS = [
   { value: '18_24', label: '18–24' },
@@ -15,6 +15,7 @@ const STAGE1_KNOWLEDGE_OPTIONS = [
   { value: 'non-expert', label: 'New to it — Energy is not something I have thought much about' },
 ];
 
+// Renders Stage 1's two pages and advances between them.
 function Stage1({ responses, update, onComplete, onBack }) {
   const TOTAL = 2;
   const [q, setQ] = React.useState(0);
@@ -22,8 +23,8 @@ function Stage1({ responses, update, onComplete, onBack }) {
   const onNext = () => (q < TOTAL - 1 ? setQ(q + 1) : onComplete());
   const goBack = () => (q === 0 ? onBack() : setQ(q - 1));
 
-  // Page 1 is now all optional (name + age range), so Next is always enabled.
-  // Page 2's knowledge question is still required.
+  // Page 1 fields are optional, so Next is always enabled there.
+  // Page 2's knowledge question is the only required answer in Stage 1.
   const canContinue =
     q === 0 ||
     (q === 1 && responses.energyKnowledge !== undefined);
@@ -108,7 +109,7 @@ function Stage1({ responses, update, onComplete, onBack }) {
   );
 }
 
-// Small field wrapper — label + optional sublabel + control.
+// Wraps a label (and optional sublabel) above any form control.
 function Field({ label, sublabel, children }) {
   return (
     <div style={{ marginBottom: 22 }}>

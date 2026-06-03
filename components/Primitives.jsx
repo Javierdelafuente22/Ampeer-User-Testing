@@ -1,6 +1,8 @@
-// Shared primitives for Peerway onboarding.
+// UI primitives shared by every screen in the onboarding flow.
+// All are written as plain function components and exported on window
+// so any screen can use them without an import.
 
-// Primary forest-green button with optional arrow.
+// Primary forest-green button with an optional trailing icon.
 function PwButton({ children, onClick, disabled, variant = 'primary', icon, style, ...rest }) {
   const klass = variant === 'ghost' ? 'pw-btn pw-btn--ghost' : 'pw-btn';
   return (
@@ -11,7 +13,7 @@ function PwButton({ children, onClick, disabled, variant = 'primary', icon, styl
   );
 }
 
-// Logo mark — a stylized "P" made of two energy waves.
+// Ampeer logo mark on its own (just the square, no wordmark).
 function PeerwayMark({ size = 32, color = 'var(--forest-700)' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" style={{ display: 'block' }}>
@@ -32,7 +34,7 @@ function PeerwayMark({ size = 32, color = 'var(--forest-700)' }) {
   );
 }
 
-// Peerway wordmark (logo + name)
+// Logo mark + "Ampeer" wordmark, side by side.
 function PeerwayLogo({ size = 22 }) {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
@@ -45,7 +47,7 @@ function PeerwayLogo({ size = 22 }) {
   );
 }
 
-// Progress dots for the onboarding flow
+// Row of dots showing onboarding progress; the active step is a pill.
 function PwProgress({ current, total = 6 }) {
   return (
     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -66,18 +68,14 @@ function PwProgress({ current, total = 6 }) {
   );
 }
 
-// Screen frame — sets padding + houses progress header.
-// When there's nothing in the header (no back button AND no progress dots),
-// collapse it to a minimal status-bar-clearing spacer instead of reserving
-// a full 100px-ish row of empty space.
+// Wraps a screen with padding and an optional sticky header that holds
+// the back button and progress dots. When neither is needed the header
+// collapses to a thin spacer that just clears the iOS status bar.
 function PwScreen({ children, onBack, step, totalSteps = 6, style }) {
   const headerEmpty = !onBack && typeof step !== 'number';
   return (
     <div className="pw-screen pw-fade-in" style={style}>
       {headerEmpty ? (
-        // Slim spacer — just enough to clear the iOS status bar / dynamic island
-        // when wrapped in IOSDevice on desktop. On mobile fullscreen this is
-        // simply some breathing room.
         <div style={{ height: 48 }}/>
       ) : (
         <div style={{
@@ -106,8 +104,8 @@ function PwScreen({ children, onBack, step, totalSteps = 6, style }) {
   );
 }
 
-// Consistent page title used by every screen for hierarchy.
-// Renders as: [eyebrow uppercase] TITLE (32-36px) [subtitle 15px muted]
+// Standard page title block used by every screen: optional small eyebrow,
+// large title, optional muted subtitle.
 function PwPageTitle({ eyebrow, title, subtitle, size = 32 }) {
   return (
     <div style={{ marginTop: 12, marginBottom: 24 }}>
@@ -134,7 +132,9 @@ function PwPageTitle({ eyebrow, title, subtitle, size = 32 }) {
   );
 }
 
-// Small info tooltip — always opens upward and to the right; arrow at bottom-left
+// Small "(i)" info button that pops a dark tooltip above it. Only one
+// tooltip can be open at a time; opening one fires a custom event that
+// asks any other tooltips to close themselves.
 function PwTooltip({ label }) {
   const [open, setOpen] = React.useState(false);
   const idRef = React.useRef(Math.random());
@@ -186,7 +186,8 @@ function PwTooltip({ label }) {
   );
 }
 
-// Reassurance box (used on screen 5)
+// Dark "you're safe" card with a shield icon — used to flag privacy
+// or data-handling reassurances on the legal screen.
 function PwReassurance({ title, children }) {
   return (
     <div style={{

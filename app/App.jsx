@@ -1,10 +1,16 @@
-// Main App shell — houses the 5-tab app in an iOS frame with annotation rails.
+// Standalone preview wrapper for the five-tab main app — renders it
+// inside the iOS device frame with design notes on the right and the
+// tweaks panel for the editor host. The survey flow goes through
+// app/MainAppShell.jsx instead.
+
+// EDITMODE markers let the host editor patch these defaults in place.
 const APP_TWEAKS = /*EDITMODE-BEGIN*/{
   "startTab": "dashboard",
   "houseMode": "sunny",
   "showLiveFlows": true
 }/*EDITMODE-END*/;
 
+// Top-level preview app: holds the active tab and listens for editor messages.
 function PeerwayMainApp() {
   const [tweaks, setTweaks] = React.useState(APP_TWEAKS);
   const [editMode, setEditMode] = React.useState(false);
@@ -14,7 +20,7 @@ function PeerwayMainApp() {
 
   React.useEffect(() => localStorage.setItem('pw_main_tab', tab), [tab]);
 
-  // Tweaks protocol
+  // Listen for the host editor's messages, then announce we're ready.
   React.useEffect(() => {
     const onMsg = (e) => {
       const d = e.data || {};
@@ -105,6 +111,7 @@ function PeerwayMainApp() {
   );
 }
 
+// Left rail: a numbered list of the five tabs with the active one highlighted.
 function AppLeftRail({ active }) {
   const tabs = [
     { id: 'home',      label: 'Home',      sub: 'Live energy flow' },
@@ -156,6 +163,7 @@ function AppLeftRail({ active }) {
   );
 }
 
+// Right rail: design notes for the currently active tab.
 function AppNotesRail({ tab }) {
   const notes = {
     dashboard: {
@@ -242,6 +250,7 @@ function AppNotesRail({ tab }) {
   );
 }
 
+// Floating preview-only panel that lets the editor host change the start tab.
 function AppTweaksPanel({ tweaks, onChange, tab, setTab }) {
   return (
     <div style={{
@@ -279,6 +288,7 @@ function AppTweaksPanel({ tweaks, onChange, tab, setTab }) {
   );
 }
 
+// Small wrapper that puts a tiny caption above a row of tweak controls.
 function TweakSection({ label, children }) {
   return (
     <div style={{ marginBottom: 12 }}>

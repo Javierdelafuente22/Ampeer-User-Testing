@@ -1,16 +1,13 @@
+// A self-contained iOS 26 ("Liquid Glass") device chrome built in pure SVG.
+// Provides the device frame plus a status bar, nav bar, grouped list, and
+// a faux keyboard. The survey only uses IOSDevice and its status bar — the
+// rest are exported for completeness so other screens can reuse them.
 
-// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
-// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
-// Exports: IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
-
-// Single knob for visually shrinking the iOS frame on desktop. Mobile renders
-// full-viewport with no frame, so this only affects the laptop/browser view.
-// Tune 0.80–0.95 to taste. transform-origin: center keeps it visually centred.
+// Scale applied to the desktop frame so the phone doesn't feel oversized
+// inside a browser window. Mobile renders full-viewport and ignores this.
 const DESKTOP_FRAME_SCALE = 0.8;
 
-// ─────────────────────────────────────────────────────────────
-// Status bar
-// ─────────────────────────────────────────────────────────────
+// iOS status bar: the time on the left and signal / wifi / battery on the right.
 function IOSStatusBar({ dark = false, time = '9:41' }) {
   const c = dark ? '#fff' : '#000';
   return (
@@ -47,9 +44,7 @@ function IOSStatusBar({ dark = false, time = '9:41' }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Liquid glass pill — blur + tint + shine
-// ─────────────────────────────────────────────────────────────
+// Rounded "liquid glass" pill (blur + tint + shine) used by the nav bar pills.
 function IOSGlassPill({ children, dark = false, style = {} }) {
   return (
     <div style={{
@@ -83,9 +78,8 @@ function IOSGlassPill({ children, dark = false, style = {} }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Navigation bar — glass pills + large title
-// ─────────────────────────────────────────────────────────────
+// iOS-style navigation bar: glass back-chevron and trailing menu pill,
+// plus a large bold title underneath.
 function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
   const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
   const text = dark ? '#fff' : '#000';
@@ -131,9 +125,7 @@ function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Grouped list (inset card, r:26) + row (52px)
-// ─────────────────────────────────────────────────────────────
+// One row in an iOS grouped list: icon, title, optional detail, chevron.
 function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
   const text = dark ? '#fff' : '#000';
   const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
@@ -169,6 +161,7 @@ function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark 
   );
 }
 
+// iOS grouped list container with an optional uppercase header.
 function IOSList({ header, children, dark = false }) {
   const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
   const bg = dark ? '#1C1C1E' : '#fff';
@@ -189,9 +182,9 @@ function IOSList({ header, children, dark = false }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Device frame
-// ─────────────────────────────────────────────────────────────
+// The phone "shell": rounded body, dynamic island, status bar at the top,
+// home indicator at the bottom, and a scrollable area for the screen content.
+// Updates the clock once every 30 seconds.
 function IOSDevice({
   children, width = 402, height = 874, dark = false,
   title, keyboard = false,
@@ -244,9 +237,8 @@ function IOSDevice({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Keyboard — iOS 26 liquid glass
-// ─────────────────────────────────────────────────────────────
+// Decorative iOS-style keyboard. Not functional — used only when a screen
+// wants the keyboard visible in the visual mockup.
 function IOSKeyboard({ dark = false }) {
   const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
   const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';

@@ -1,11 +1,17 @@
-// Your House — live energy flow, weather-driven scene + node pop-ups.
-// Weather state (live + override) is owned by MainAppShell so the override
-// applied here also drives the Community tab. We just consume `weatherState`
-// as a prop. Active kind / temp / loading flags all come from there.
-const WEEK_SAVED = 8.40; // shared with Dashboard week figure
-const PRICES = { importP: 20, exportP: 10, p2p: 15 }; // pence / kWh
-const BATTERY_SOC = 40; // %
+// The Home tab. Shows an animated "live energy flow" diagram of the
+// house, battery, grid, and community, plus tappable nodes that open a
+// small info pop-up. The weather (live or user-overridden) drives both
+// the colour scheme and which energy flows are active.
+//
+// Weather state itself lives in MainAppShell so the same override also
+// drives the Community tab. This tab just consumes it as a prop.
 
+const WEEK_SAVED = 8.40;
+const PRICES = { importP: 20, exportP: 10, p2p: 15 };
+const BATTERY_SOC = 40;
+
+// Returns the scene values (production, usage, surplus, caption, etc.)
+// for a given weather kind. Used to drive readouts and flow particles.
 function sceneFor(kind) {
   if (kind === 'sunny') return {
     solarKw: 3.8, useKw: 1.2, thirdKw: 2.6, thirdLabel: 'Surplus', prodPct: 90,
@@ -36,9 +42,9 @@ const CANVAS_BG = {
   night:  'linear-gradient(180deg, #1F2940 0%, #0F1828 100%)',
 };
 
+// Renders the Home tab: header, weather pill, scene canvas, banners,
+// readouts, and the inline pop-ups for the tapped nodes.
 function HouseTab({ onNavigate, highlight, onClearHighlight, weatherState }) {
-  // Weather state is owned by MainAppShell so the same override drives the
-  // Community tab's animation. We just consume it here.
   const { weather, override, setOverride, liveKind, activeKind, activeTemp,
           isLoading, hasError, isLive } = weatherState;
   const [tick, setTick] = React.useState(0);
@@ -46,9 +52,10 @@ function HouseTab({ onNavigate, highlight, onClearHighlight, weatherState }) {
   const [hovBanner, setHovBanner] = React.useState(false);
   const [hovSavings, setHovSavings] = React.useState(false);
   const [showOverride, setShowOverride] = React.useState(false);
-  const [popup, setPopup] = React.useState(null); // 'sun' | 'home' | 'grid' | 'community' | null
-  const [prices, setPrices] = React.useState(PRICES); // live Agile rates if Octopus reachable; else fallback
+  const [popup, setPopup] = React.useState(null);
+  const [prices, setPrices] = React.useState(PRICES);
 
+  // Animation clock — drives the flow-line particles and sun rays.
   React.useEffect(() => {
     let raf;
     const start = performance.now();
@@ -60,6 +67,8 @@ function HouseTab({ onNavigate, highlight, onClearHighlight, weatherState }) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // When the tab is opened from elsewhere with a "highlight" hint, give the
+  // canvas a brief green glow so the user knows where to look.
   React.useEffect(() => {
     if (!highlight) return;
     onClearHighlight && onClearHighlight();
@@ -68,9 +77,11 @@ function HouseTab({ onNavigate, highlight, onClearHighlight, weatherState }) {
     return () => clearTimeout(t);
   }, [highlight]);
 
-  // Octopus Agile — current half-hour import + export Agile rates for region C (London).
-  // Product codes rotate over time, so we resolve the active ones dynamically from
-  // /products/ and then fetch unit rates. P2P price = midpoint. Falls back to PRICES on failure.
+  // Pull the current half-hour Agile import and export rates from Octopus's
+  // public API for region C (London). The active product code changes over
+  // time, so we look it up dynamically first. The peer-to-peer price is the
+  // midpoint between import and export. If anything fails we keep the
+  // hard-coded defaults in PRICES so the UI still has values to show.
   React.useEffect(() => {
     let cancelled = false;
     const now = new Date();
@@ -293,6 +304,7 @@ function HouseTab({ onNavigate, highlight, onClearHighlight, weatherState }) {
   );
 }
 
+// One of the three small "live readouts" tiles under the canvas.
 function Readout({ icon, label, value, unit, accent }) {
   return (
     <div style={{
@@ -319,6 +331,9 @@ function Readout({ icon, label, value, unit, accent }) {
   );
 }
 
+// Small status pill at the top-right of the canvas. Shows whether the
+// weather is live, loading, or overridden, and lets the user open the
+// override panel.
 function WeatherPill({ isLoading, override, onTap }) {
   let dotColor, text;
   if (override)         { dotColor = '#E4A23A'; text = `Demo · ${override}`; }
@@ -346,6 +361,9 @@ function WeatherPill({ isLoading, override, onTap }) {
   );
 }
 
+// Full-screen panel where the user can force-set the weather kind
+// (sunny / cloudy / rainy / night) for demo purposes. Tapping Reset
+// returns to live data from the Met Office.
 function OverridePanel({ override, onChange, liveKind, isLive, isLoading, hasError, onBack }) {
   const options = ['sunny', 'cloudy', 'rainy', 'night'];
   const sliderValue = options.indexOf(override || liveKind);
@@ -468,6 +486,7 @@ function OverridePanel({ override, onChange, liveKind, isLive, isLoading, hasErr
   );
 }
 
+// Tiny green up-triangle used inside the battery pop-up to indicate charging.
 function ArrowUp({ size = 10 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 10 10" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
@@ -476,6 +495,7 @@ function ArrowUp({ size = 10 }) {
   );
 }
 
+// Tiny red down-triangle used inside the battery pop-up to indicate discharge.
 function ArrowDown({ size = 10 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 10 10" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
@@ -484,6 +504,9 @@ function ArrowDown({ size = 10 }) {
   );
 }
 
+// Small "info card" overlay that appears when the user taps a node
+// (sun, home, battery, grid, community) on the scene. Each kind has its
+// own title, set of stats, plain-English insight, and optional CTA.
 function NodePopup({ kind, weatherKind, temp, scene, prices, onClose, onNavigate }) {
   const labels = { sunny: 'Clear / sunny', cloudy: 'Cloudy', rainy: 'Rainy', night: 'Night' };
   const fmtP = (n) => n.toFixed(1);
@@ -496,9 +519,10 @@ function NodePopup({ kind, weatherKind, temp, scene, prices, onClose, onNavigate
         ? 'Your panels cover everything you use, with a small surplus for the battery and a neighbour.'
         : 'Your panels are powering your home, charging the battery, and sharing with neighbours.';
 
-  // Battery is one of: charging | discharging | holding (only first two used today,
-  // but the insight covers all three so a 'holding' state can be added without churn).
-  const battState = scene.batteryState; // 'charging' | 'discharging' | 'holding'
+  // Battery has three possible states; only "charging" and "discharging" are
+  // produced by the scenes today, but the copy below covers "holding" too so
+  // it can be added later without changing the popup.
+  const battState = scene.batteryState;
   const batteryInsight = battState === 'discharging' ? 'Discharging — powering your home.'
                        : battState === 'holding'     ? 'Holding — battery is steady, no energy moving.'
                                                      : 'Charging — topping up from your panels.';
@@ -667,14 +691,15 @@ function NodePopup({ kind, weatherKind, temp, scene, prices, onClose, onNavigate
   );
 }
 
-// Layout: SUN top-center, HOUSE middle-center, then bottom row: BATTERY — GRID — COMMUNITY.
-// House nudged up + bottom row nudged down to give the flows breathing room.
+// SVG canvas containing the whole "live energy flow" scene.
 //
-// HEIGHT / SIZE TWEAKS — change these to resize bottom-row icons (1 = current size).
-// Examples:
-//   const BATT_SCALE = 0.85;  → battery is 15% smaller
-//   const GRID_SCALE = 1.2;   → grid pole is 20% taller / wider
-// Y-positions are also free knobs: bump BATT_Y / GRID_Y / COMM_Y to shift a single icon.
+// Layout: sun at the top, house in the middle, and a bottom row of
+// battery / grid / community. The X/Y constants below position each
+// node; the *_SCALE constants resize the bottom-row icons (1.0 = current).
+//
+// Which flow lines are visible depends on the weather: at night and in
+// the rain there's no solar, so the diagram flips to battery → home and
+// grid → community.
 function HouseScene({ tick, kind, onTap }) {
   const HOUSE_X = 180, HOUSE_Y = 155;
   const BATT_X  = 55,  BATT_Y = 285;
@@ -684,12 +709,12 @@ function HouseScene({ tick, kind, onTap }) {
   const BATT_SCALE = 1.0;
   const GRID_SCALE = 0.9;
   const COMM_SCALE = 1.0;
-  const isOff = kind === 'rainy' || kind === 'night'; // no solar — battery + grid scenario
+  const isOff = kind === 'rainy' || kind === 'night';
   const batteryState = isOff ? 'discharging' : 'charging';
-  const battFill   = batteryState === 'discharging' ? '#C29670' : '#86A893'; // muted amber / sage
-  const RAIN_BLUE  = '#2F5C84'; // darker blue for rainy flow particles
-  const NIGHT_BLUE = '#6F8FB8'; // lighter blue for visibility on dark night canvas
-  const GREY_FLOW  = '#7B8689'; // neutral grey for grid → community in cloudy
+  const battFill   = batteryState === 'discharging' ? '#C29670' : '#86A893';
+  const RAIN_BLUE  = '#2F5C84';
+  const NIGHT_BLUE = '#6F8FB8';
+  const GREY_FLOW  = '#7B8689';
   const flowBlue   = kind === 'night' ? NIGHT_BLUE : RAIN_BLUE;
   const labelColor = kind === 'night' ? '#E8EDF5' : 'var(--ink-900)';
 
@@ -928,6 +953,7 @@ function HouseScene({ tick, kind, onTap }) {
   );
 }
 
+// Decorative SVG cloud built from five overlapping ellipses.
 function Cloud({ cx, cy, scale = 1, dark = false }) {
   const fill = dark ? '#5B6770' : '#FFFFFF';
   const op   = dark ? 0.92 : 0.94;
@@ -942,6 +968,7 @@ function Cloud({ cx, cy, scale = 1, dark = false }) {
   );
 }
 
+// Falling raindrops driven by the same tick clock as the flow particles.
 function Rain({ tick }) {
   return (
     <g style={{ pointerEvents: 'none' }}>
@@ -959,6 +986,7 @@ function Rain({ tick }) {
   );
 }
 
+// Bold uppercase label drawn under each node ("YOUR HOME", "BATTERY", etc.).
 function NodeLabel({ x, y, text, fill = 'var(--ink-900)' }) {
   return (
     <g>
@@ -971,6 +999,8 @@ function NodeLabel({ x, y, text, fill = 'var(--ink-900)' }) {
   );
 }
 
+// Animated dashed line with small dots travelling along it. Used for each
+// energy flow on the scene (sun → home, home → community, etc.).
 function FlowLine({ path, tick, color, speed = 1, particles = 4, dashed }) {
   const ref = React.useRef();
   const [len, setLen] = React.useState(0);

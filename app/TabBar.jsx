@@ -1,4 +1,5 @@
-// Tab bar — 5 tabs, Dashboard center + elevated
+// The fixed bottom tab bar shown on every screen of the main app. Five
+// tabs in a row; the active one gets a green dot above its icon.
 const TABS = [
   { id: 'home',      label: 'Home',      Icon: null },
   { id: 'community', label: 'Community', Icon: null },
@@ -7,6 +8,7 @@ const TABS = [
   { id: 'profile',   label: 'Profile',   Icon: null },
 ];
 
+// Renders the bottom tab bar and reports which tab the user tapped.
 function TabBar({ active, onChange }) {
   const iconFor = (id, filled) => {
     const map = {
@@ -72,7 +74,8 @@ function TabBar({ active, onChange }) {
   );
 }
 
-// Page header used by all 5 tabs for consistent hierarchy.
+// Sticky title block reused by every tab so titles align visually.
+// Pads the top differently on mobile vs desktop to clear the OS / faux status bar.
 function TabHeader({ eyebrow, title, right, subtitle }) {
   const isMobile =
     window.matchMedia('(max-width: 600px) and (pointer: coarse)').matches ||

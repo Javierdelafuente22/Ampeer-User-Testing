@@ -1,4 +1,6 @@
-// Screen 4 — Profile confirmation
+// Onboarding screen 4 — shows the household profile pre-filled from
+// Octopus (solar, EV, work pattern, household size) so the user can
+// confirm it before continuing.
 function Screen4_Profile({ state, setState, onNext, onBack, fullName = 'Sarah Chen', initials = 'SC' }) {
   const facts = state.profile || [
     { id: 'solar',  icon: <IconSolar size={16}/>,     label: 'Solar',           value: '8 panels · 3.2 kWp',       why: "Helps us know how much you can trade" },

@@ -1,9 +1,7 @@
-// Transition screen — high-contrast forest-green takeover that signals
-// "you're about to begin a new part of the study."
-
+// Full-screen green takeover shown between the survey stages. Signals
+// to the participant that they're moving on to a new part of the study.
 function TransitionScreen({ title, subtitle, cta, onContinue, eyebrow = 'Next up' }) {
-  // Match the iOS status-bar tint to the forest gradient's top so the area
-  // behind the time/wifi/battery icons isn't a cream stripe.
+  // Re-tint the iOS status bar to match the gradient, then restore it on unmount.
   React.useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) return;

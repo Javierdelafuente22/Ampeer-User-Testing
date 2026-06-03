@@ -1,17 +1,14 @@
-// Top-level orchestrator. Drives the full user-study flow:
+// State machine that drives the whole user study. The phase variable
+// walks through each step in order:
 //
 //   consent → stage1 → transition → onboarding → stage2 → transition →
 //   app_exploration → stage3 → submitting → complete (or fallback)
 //
-// During Stage 3 the user can tap "Back to the app" to re-enter MainAppShell,
-// then return to the same question they left.
-//
-// A fresh JS load (refresh, new tab) always restarts the study — one participant
-// per session is the assumption.
-
+// Stage 3 has a "Back to the app" path that re-enters MainAppShell and
+// then returns to the same question. A page refresh always restarts the
+// study — the assumption is one participant per session.
 function PeerwayRoot() {
   const [phase, setPhase] = React.useState(() => {
-    // Wipe any prior completion flag on every fresh load.
     try { sessionStorage.removeItem('pw_onboarded'); } catch (e) {}
     return 'consent';
   });
@@ -22,10 +19,9 @@ function PeerwayRoot() {
     firstName: '',
   }));
 
-  // Display name plumbed through the demo.
-  // - No name from participant → defaults to "Sarah Chen" / "SC".
-  // - Name provided        → last name is masked (e.g. "Javi •••••") since we
-  //                           don't have one. Avatar shows just the first letter.
+  // The name shown throughout the demo. If the participant gave one, the
+  // app uses it but masks the missing surname (e.g. "Javi •••••"). If not,
+  // we fall back to the default "Sarah Chen" persona.
   const trimmedFirst = (responses.firstName || '').trim();
   const userProvidedName = trimmedFirst.length > 0;
   const displayFirstName = userProvidedName ? trimmedFirst : 'Sarah';
@@ -35,10 +31,12 @@ function PeerwayRoot() {
     : 'SC';
   const [submissionError, setSubmissionError] = React.useState(null);
 
-  // Tracked separately so MainAppShell can mutate without re-rendering the whole tree.
+  // Held at the root so the tab-visit counter survives navigation in and out
+  // of MainAppShell during Stage 3.
   const [tabsVisited, setTabsVisited] = React.useState([]);
 
-  // Stage 3 question index — preserved across "Back to the app" / "Return".
+  // The Stage 3 question index lives here so it's kept when the participant
+  // taps "Back to the app" and later returns to the questionnaire.
   const [stage3Q, setStage3Q] = React.useState(0);
   const [stage3RevisitingApp, setStage3RevisitingApp] = React.useState(false);
 
@@ -46,6 +44,8 @@ function PeerwayRoot() {
     setResponses(r => ({ ...r, ...patch }));
   }, []);
 
+  // Final submit: tag the responses with the end time and duration, send
+  // them to Supabase, and route to either the success or fallback screen.
   const handleSubmit = React.useCallback(async () => {
     const finalResponses = {
       ...responses,
@@ -64,6 +64,8 @@ function PeerwayRoot() {
     }
   }, [responses, tabsVisited]);
 
+  // "Try again" handler on the fallback screen. Uses the responses we
+  // already finalised, no re-tagging needed.
   const retrySubmit = React.useCallback(async () => {
     setPhase('submitting');
     const result = await window.submitSurveyToSheets({ ...responses, appTabsVisited: tabsVisited });
@@ -75,7 +77,8 @@ function PeerwayRoot() {
     }
   }, [responses, tabsVisited]);
 
-  // Helper to render a survey screen inside the iOS frame (desktop) or full-screen (mobile).
+  // Drops a survey screen into the iOS device frame on desktop, or renders
+  // it full-viewport on mobile. Used by almost every phase below.
   const renderInFrame = (content) => {
     const isMobile =
       window.matchMedia('(max-width: 600px) and (pointer: coarse)').matches ||
@@ -111,17 +114,17 @@ function PeerwayRoot() {
     );
   };
 
-  // ─────────────────────── routing ───────────────────────
+  // ─────────────────────── phase routing ───────────────────────
 
-  // Stage 3 "Back to the app" mode — render MainAppShell with a Return CTA.
-  // Land on the tab most relevant to the current question, so the participant
-  // doesn't waste time re-navigating to verify their answer.
+  // Stage 3 "Back to the app" mode: drop the participant straight onto the
+  // tab that's most relevant to the question they're answering, so they
+  // don't have to navigate around to verify their answer.
   if (phase === 'stage3' && stage3RevisitingApp) {
     const tabForStage3Q = (qi) => {
-      if (qi === 4) return 'community';                  // Q5 community sense
-      if (qi === 5 || qi === 6) return 'dashboard';      // Q6/Q7 dashboard
-      if (qi === 7 || qi === 8) return 'assistant';      // Q8/Q9 assistant + smart mode
-      if (qi === 9) return 'profile';                    // Q10 profile
+      if (qi === 4) return 'community';
+      if (qi === 5 || qi === 6) return 'dashboard';
+      if (qi === 7 || qi === 8) return 'assistant';
+      if (qi === 9) return 'profile';
       return 'home';
     };
     return (
@@ -178,7 +181,6 @@ function PeerwayRoot() {
         firstName={displayFirstName}
         fullName={displayFullName}
         initials={displayInitials}
-        userProvidedName={userProvidedName}
         userProvidedName={userProvidedName}
         onComplete={() => {
           try { sessionStorage.setItem('pw_onboarded', '1'); } catch (e) {}

@@ -1,10 +1,9 @@
-// Stage 2 — Post-onboarding (5 questions).
-// Q1, Q2: simple YMN.
-// Q3: screenshot comparison — setup.
-// Q4: YMN about T&C summary + a "Read T&C" CTA that opens Screen5_Legal in
-//     readOnly mode. From there the only exit is "Return to questionnaire".
-// Q5: screenshot comparison — terms.
+// Stage 2 — five questions shown after onboarding:
+//   Q1, Q2, Q4: Yes/Maybe/No
+//   Q3, Q5:    Ampeer vs Enphase screenshot comparisons
+// Q4 also offers a "Read T&C" button that opens the full terms screen.
 
+// Renders one question at a time and tracks the participant's answers.
 function Stage2({ responses, update, onComplete, onBack }) {
   const TOTAL = 5;
   const [q, setQ] = React.useState(0);
@@ -12,19 +11,19 @@ function Stage2({ responses, update, onComplete, onBack }) {
   const onNext = () => (q < TOTAL - 1 ? setQ(q + 1) : onComplete());
   const goBack = () => (q === 0 ? onBack() : setQ(q - 1));
 
-  // Display order (not storage order). The descriptive `q3_termsHelpedUnderstandRights`
-  // key now appears at visual position 4, and vice versa — the column names in
-  // Supabase are descriptive, so no schema change is needed.
+  // The display order isn't the storage order: the setup comparison
+  // (stored as q4) is shown before the terms YMN (stored as q3).
+  // Storage keys stay stable so the Supabase schema doesn't need to change.
   const answers = [
-    responses.stage2_q1_simpleOnboarding,                // Q1
-    responses.stage2_q2_understoodAmpeer,                // Q2
-    responses.stage2_q4_setupComparison,                 // Q3 (was Q4)
-    responses.stage2_q3_termsHelpedUnderstandRights,     // Q4 (was Q3)
-    responses.stage2_q5_termsComparison,                 // Q5
+    responses.stage2_q1_simpleOnboarding,
+    responses.stage2_q2_understoodAmpeer,
+    responses.stage2_q4_setupComparison,
+    responses.stage2_q3_termsHelpedUnderstandRights,
+    responses.stage2_q5_termsComparison,
   ];
   const answered = answers[q] !== undefined;
 
-  // Reading T&Cs takes over the screen — no back/forth through the questionnaire.
+  // While the terms screen is open it replaces the questionnaire entirely.
   if (viewingTerms) {
     return (
       <Screen5_Legal

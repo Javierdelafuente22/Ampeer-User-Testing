@@ -1,9 +1,11 @@
-// Stage 3 — Post-app (11 numbered + 1 open feedback = 12 panels total).
-// "Back to the app" lets the participant re-enter MainAppShell mid-survey
-// and resume on the same question they left.
+// Stage 3 — the final questionnaire: 11 questions plus one optional
+// open-text + follow-up email panel. The "Back to the app" link lets
+// the participant return to MainAppShell mid-survey and pick up on the
+// same question, which is why questionIndex is owned by the parent.
 
+// Renders one panel at a time and submits when the last is answered.
 function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQuestionIndex }) {
-  const TOTAL = 12; // displayed total — 11 questions + 1 open-text/email panel
+  const TOTAL = 12;
   const q = questionIndex;
   const onNext = () => (q < TOTAL - 1 ? setQuestionIndex(q + 1) : onSubmit());
   const goBack = () => (q > 0 ? setQuestionIndex(q - 1) : undefined);
@@ -23,7 +25,7 @@ function Stage3({ responses, update, onSubmit, onBackToApp, questionIndex, setQu
     responses.stage3_q10_profileSupport,
     responses.stage3_q11_appWillingnessSolar,
   ];
-  // Last panel (q=11) is the optional open text + email, no answer required.
+  // The last panel is optional (open feedback + email), so always counts as answered.
   const answered = q === 11 ? true : answers[q] !== undefined;
 
   return (

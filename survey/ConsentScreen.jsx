@@ -1,4 +1,5 @@
-// Consent screen — first thing the participant sees.
+// The first screen of the study. The participant must tick the consent
+// checkbox before the "Begin study" button becomes enabled.
 function ConsentScreen({ onContinue }) {
   const [agreed, setAgreed] = React.useState(false);
   return (
@@ -68,6 +69,7 @@ function ConsentScreen({ onContinue }) {
   );
 }
 
+// One row in the "what this study involves" card.
 function InfoRow({ icon, title, detail }) {
   return (
     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>

@@ -1,7 +1,6 @@
-// Clean onboarding flow — 6-screen flow. Calls onComplete when done.
-// On mobile, renders full-screen with no frame.
-// On desktop, keeps the centered IOSDevice card.
-
+// The six-screen onboarding flow used by the survey. Calls onComplete
+// when the user finishes the last screen. Renders full-screen on phones
+// and inside the iOS device frame on larger viewports.
 function OnboardingFlow({ onComplete, firstName = 'Sarah', fullName = 'Sarah Chen', initials = 'SC', userProvidedName = false }) {
   const [step, setStep] = React.useState(0);
   const [state, setState] = React.useState({});

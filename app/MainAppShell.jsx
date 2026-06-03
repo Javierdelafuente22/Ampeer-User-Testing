@@ -1,17 +1,20 @@
-// Clean main-app shell — 5-tab app.
-// On mobile (touch + narrow screen), renders full-screen with no frame.
-// On desktop, keeps the centered IOSDevice card.
+// Container for the five-tab main app. Renders the tab bar and whichever
+// tab is active, plus the survey-only "end study" / "return" overlays.
+// Mobile gets a full-screen layout; desktop gets the iOS device frame.
 
-// Weather state is owned here (not in HouseTab) so the override applied on the
-// Home tab also drives the Community tab's animation.
-const SHELL_WEATHER_LAT = 51.48, SHELL_WEATHER_LON = -0.20; // Fulham, SW6
+// Weather state lives in the shell rather than in HouseTab so the user's
+// "what if it were sunny" override also drives CommunityTab's background.
+const SHELL_WEATHER_LAT = 51.48, SHELL_WEATHER_LON = -0.20;
+
+// Maps Open-Meteo's weather codes to one of three buckets the UI cares about.
 function shellClassifyWeather(code) {
   if (code <= 1) return 'sunny';
   if (code <= 64) return 'cloudy';
   return 'rainy';
 }
 
-// Night runs 20:00–06:00 UK local time. Overrides the live weather kind.
+// True between 20:00 and 06:00 UK local time. Overrides the weather kind
+// so the Home tab switches to its night palette regardless of cloud cover.
 function isUKNight(date) {
   const hr = parseInt(
     new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(date),
@@ -20,6 +23,9 @@ function isUKNight(date) {
   return hr >= 20 || hr < 6;
 }
 
+// Hook that fetches current Fulham weather, tracks the user's "what if"
+// override (sunny / cloudy / rainy / night), and combines them into a
+// single "active kind" the tabs can read.
 function useWeatherState() {
   const [weather, setWeather] = React.useState(null);
   const [override, setOverride] = React.useState(null);
@@ -51,10 +57,9 @@ function useWeatherState() {
   }, []);
 
   const isNight = isUKNight(now);
-  // Time wins over weather: at night, kind is 'night' regardless of cloud cover.
   const liveKind = isNight ? 'night' : (weather?.kind ?? 'sunny');
-  // An override that matches the live kind is treated as no override at all,
-  // so the user can "slide back to live" without tapping Reset.
+  // If the user's override matches what's actually outside, treat it as no
+  // override at all — that way "sliding back to live" doesn't need a Reset button.
   const effectiveOverride = override && override !== liveKind ? override : null;
   const activeKind = effectiveOverride || liveKind;
   const activeTemp = weather?.temp ?? 18;
@@ -65,6 +70,9 @@ function useWeatherState() {
   return { weather, override: effectiveOverride, setOverride, liveKind, activeKind, activeTemp, isLoading, hasError, isLive };
 }
 
+// Main app container. Owns the active tab plus a few cross-tab UX bits
+// (community highlight when navigated from home, weather state, tab-visit
+// reporting for the survey's "visit all 5 tabs" counter).
 function MainAppShell({
   tabsVisited = [], onTabVisit, endStudyMode, onEndStudy,
   firstName = 'Sarah', fullName = 'Sarah Chen', initials = 'SC',
@@ -81,8 +89,8 @@ function MainAppShell({
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true;
 
-  // Report the initial 'home' visit immediately so the counter starts at 1/5,
-  // not 0/5. Subsequent visits are reported when the user taps a tab.
+  // Report the initial tab visit on mount so the "1/5" counter shows up
+  // immediately. Later visits are reported when the user taps a tab.
   React.useEffect(() => {
     onTabVisit && onTabVisit(tab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,8 +106,8 @@ function MainAppShell({
     if (fromBanner && nextTab === 'community') setCommunityHighlight(true);
   };
 
-  // Survey chrome — end-study button overlay. Visible only when a mode is set
-  // (i.e. we're inside the study, not in standalone-app mode).
+  // The floating survey pill at the top-right. Only rendered when a mode
+  // is set — i.e. we're inside the study, not the standalone app preview.
   const allTabsVisited = tabsVisited.length >= 5;
   const surveyOverlay = endStudyMode === 'end' ? (
     <EndStudyButton
@@ -122,8 +130,9 @@ function MainAppShell({
     }
   };
 
-  // AssistantTab is always mounted to preserve conversation + toggle state.
-  // It is shown/hidden via display rather than remounted on tab switch.
+  // AssistantTab is kept mounted at all times so the chat history and
+  // smart-mode toggles survive a tab switch. We hide it with display:none
+  // instead of unmounting.
   const assistantLayer = (style) => (
     <div style={{ position: 'absolute', inset: 0, display: tab === 'assistant' ? 'flex' : 'none', flexDirection: 'column', ...style }}>
       <AssistantTab firstName={firstName} userProvidedName={userProvidedName}/>
@@ -175,8 +184,8 @@ function MainAppShell({
   );
 }
 
-// Floating "Return to questionnaire" pill — shown when the participant is
-// revisiting the app from Stage 3.
+// Pill shown at the top-right of MainAppShell when the participant has
+// come back into the app from Stage 3. Tapping it returns to the survey.
 function ReturnToSurveyButton({ onClick, isMobile }) {
   const [hov, setHov] = React.useState(false);
   const top = isMobile ? 'calc(env(safe-area-inset-top, 0px) + 6px)' : 60;

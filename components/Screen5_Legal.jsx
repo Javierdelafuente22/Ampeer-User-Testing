@@ -1,6 +1,10 @@
-// Screen 5 — Legal + consent with expandable detail panels.
-// When `readOnly` is true, this is reused from Stage 2 as a static reference:
-// no checkbox, no Accept & continue, and the CTA returns to the survey.
+// Onboarding screen 5 — the consent screen. Lists three legal items
+// (Terms, Data, Erasure) that expand into full-screen detail panels,
+// and requires a checkbox tick before the CTA enables.
+//
+// Stage 2 of the survey reuses this same screen with readOnly=true so
+// participants can read the terms without ticking anything. In that mode
+// the checkbox is hidden and the CTA just returns to the questionnaire.
 function Screen5_Legal({ onNext, onBack, readOnly = false, returnLabel = 'Accept & continue' }) {
   const [agreed, setAgreed] = React.useState(false);
   const [openItem, setOpenItem] = React.useState(null);
@@ -83,7 +87,7 @@ function Screen5_Legal({ onNext, onBack, readOnly = false, returnLabel = 'Accept
     },
   ];
 
-  // If a detail panel is open, show it full-screen
+  // When an item is expanded, replace the list with that item's full text.
   if (openItem !== null) {
     const item = items[openItem];
     return (

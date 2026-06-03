@@ -1,7 +1,10 @@
-// SystemRail — shows the emerging design tokens (left side)
-// NotesRail — shows contextual design notes per screen (right side)
-// TweaksPanel — the user-facing Tweaks UI
+// Design-system chrome shown around the phone in the preview app:
+//   SystemRail  — design tokens (colour, type, radius, buttons) on the left
+//   NotesRail   — per-screen design notes on the right
+//   TweaksPanel — floating editor controls bottom-right
+// None of these render inside the actual survey or the main app.
 
+// Left rail: a one-page summary of the Ampeer design system.
 function SystemRail() {
   return (
     <div style={{ fontFamily: 'var(--font-sans)' }}>
@@ -83,6 +86,7 @@ function SystemRail() {
   );
 }
 
+// Small uppercase heading used between sections of SystemRail.
 function SectionTitle({ children, top = 0 }) {
   return (
     <div style={{
@@ -93,6 +97,7 @@ function SectionTitle({ children, top = 0 }) {
   );
 }
 
+// One row in the type-scale section: a tiny caption plus a live sample.
 function TypeRow({ label, children }) {
   return (
     <div style={{
@@ -111,7 +116,7 @@ function TypeRow({ label, children }) {
   );
 }
 
-// ───────────── Notes (right) ─────────────
+// Right-rail design notes, keyed by screen index (0-5) or state name.
 const NOTES = {
   0: {
     title: 'Screen 1 · Postcode',
@@ -179,6 +184,7 @@ const NOTES = {
   },
 };
 
+// Right rail: looks up and renders the notes for whichever screen is showing.
 function NotesRail({ step }) {
   const data = NOTES[step] || NOTES[0];
   return (
@@ -210,7 +216,8 @@ function NotesRail({ step }) {
   );
 }
 
-// ───────────── Tweaks panel ─────────────
+// Floating dark panel that lets the editor host change the accent hue,
+// provider name, and overlay state without touching the code.
 function TweaksPanel({ tweaks, onChange }) {
   const accents = ['forest', 'emerald', 'teal', 'copper'];
   return (
@@ -288,6 +295,7 @@ function TweaksPanel({ tweaks, onChange }) {
   );
 }
 
+// Tiny uppercase caption used between rows inside the tweaks panel.
 function TLabel({ children }) {
   return (
     <div style={{
@@ -296,6 +304,7 @@ function TLabel({ children }) {
     }}>{children}</div>
   );
 }
+// Pill-style segmented control button inside the tweaks panel.
 function TogBtn({ children, active, onClick }) {
   return (
     <button onClick={onClick} style={{

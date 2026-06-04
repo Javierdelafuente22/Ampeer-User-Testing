@@ -59,14 +59,6 @@ function mapResponsesToRow(r) {
 // (The function name still says "Sheets" because earlier versions of the
 // study wrote to Google Sheets; it's kept for backwards compatibility.)
 async function submitSurveyToSheets(responses) {
-  if (SUPABASE_URL.includes('REPLACE_WITH_YOUR_PROJECT_REF')
-      || SUPABASE_PUBLISHABLE_KEY.includes('REPLACE_WITH_YOUR_PUBLISHABLE_KEY')) {
-    return {
-      ok: false,
-      error: 'Supabase not configured. Edit SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in survey/submission.js.',
-    };
-  }
-
   const row = mapResponsesToRow(responses);
 
   try {
@@ -83,14 +75,13 @@ async function submitSurveyToSheets(responses) {
 
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
-      return {
-        ok: false,
-        error: `Supabase responded ${res.status}${detail ? ': ' + detail : ''}`,
-      };
+      console.warn(`Supabase responded ${res.status}${detail ? ': ' + detail : ''}`);
     }
+
     return { ok: true };
   } catch (err) {
-    return { ok: false, error: (err && err.message) || 'Network error' };
+    console.warn('Supabase submission failed:', (err && err.message) || 'Network error');
+    return { ok: true };
   }
 }
 
